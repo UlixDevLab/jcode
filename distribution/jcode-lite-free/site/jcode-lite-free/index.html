@@ -1,0 +1,841 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Jcode Lite та Lite Free — AI-помічник, який працює всередині ваших проєктів. Sage-дослідження, 19 бізнес-ролей, Memory та Knowledge OS.">
+  <title>Jcode Lite · AI-помічник для ваших проєктів</title>
+  <link rel="stylesheet" href="https://files.legrin-tech.net/jcode-lite-assets/tokens.css">
+  <link rel="stylesheet" href="https://files.legrin-tech.net/jcode-lite-assets/site.css">
+  <style>
+    .download-shell { padding-top: var(--space-8); }
+    .page-nav { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-12); flex-wrap: wrap; }
+    .brand { display: flex; align-items: center; gap: var(--space-3); color: var(--color-text); font-weight: var(--weight-button); }
+    .brand-mark { width: var(--mark-size); height: var(--mark-size); display: grid; place-items: center; border-radius: var(--radius-mark); background: var(--color-accent); color: var(--color-accent-ink); font-weight: var(--weight-mark); }
+    .page-controls { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+    .edition-switch { display: flex; padding: var(--space-1); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface-subtle); }
+    .edition-switch button { width: auto; margin: var(--space-0); padding: var(--space-2) var(--space-3); background: transparent; color: var(--color-text-muted); }
+    .edition-switch button[aria-pressed="true"] { background: var(--color-accent); color: var(--color-accent-ink); }
+    .language-switch { display: flex; padding: var(--space-1); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface-subtle); }
+    .language-switch button { width: auto; margin: var(--space-0); padding: var(--space-2) var(--space-3); background: transparent; color: var(--color-text-muted); }
+    .language-switch button[aria-pressed="true"] { background: var(--color-accent); color: var(--color-accent-ink); }
+    .tabs { display: flex; gap: var(--space-1); padding: var(--space-1); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface-subtle); margin-bottom: var(--space-8); width: fit-content; }
+    .tabs button { width: auto; margin: var(--space-0); padding: var(--space-2) var(--space-4); background: transparent; color: var(--color-text-muted); }
+    .tabs button[aria-selected="true"] { background: var(--color-accent); color: var(--color-accent-ink); }
+    .hero-grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--space-8); align-items: end; margin-bottom: var(--space-12); }
+    .hero-copy h1 { max-width: none; }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-7); }
+    .button-secondary { background: transparent; color: var(--color-text); border: var(--border-width) solid var(--color-border-strong); }
+    .hero-panel, .research-panel, .mcp-panel, .routing-panel, .cons-panel { padding: var(--space-6); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface); }
+    .panel-kicker { color: var(--color-text-faint); font-size: var(--type-xs); text-transform: uppercase; letter-spacing: var(--tracking-eyebrow); }
+    .terminal-line { display: flex; gap: var(--space-3); padding: var(--space-3) var(--space-0); border-bottom: var(--border-width) solid var(--color-border); color: var(--color-text-muted); }
+    .terminal-line:last-child { border-bottom: 0; }
+    .terminal-line strong { min-width: var(--space-20); color: var(--color-accent); }
+    .section { margin-top: var(--space-20); }
+    .section-heading { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: var(--space-8); align-items: start; margin-bottom: var(--space-8); }
+    .section-heading h2 { margin: var(--space-0); font-size: var(--type-access-title); letter-spacing: var(--tracking-title); }
+    .section-heading p { margin: var(--space-0); color: var(--color-text-soft); font-size: var(--type-body); line-height: var(--line-intro); }
+    .feature-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--border-width); overflow: hidden; border: var(--border-width) solid var(--color-border); border-radius: var(--radius-grid); background: var(--color-border); }
+    .feature { min-height: calc(var(--space-20) * 2); padding: var(--space-6); background: var(--color-surface-subtle); }
+    .feature-index { display: block; margin-bottom: var(--space-8); color: var(--color-accent); font-size: var(--type-xs); font-weight: var(--weight-button); letter-spacing: var(--tracking-eyebrow); }
+    .feature h3 { margin: var(--space-0) var(--space-0) var(--space-2); font-size: var(--type-body); }
+    .feature p, .research-panel p, .mcp-panel p, .routing-panel p, .cons-panel p { margin: var(--space-0); color: var(--color-text-muted); line-height: var(--line-copy); }
+    .origin-note { padding: var(--space-6); border-left: var(--space-1) solid var(--color-accent); background: var(--color-surface-subtle); color: var(--color-text-soft); line-height: var(--line-intro); }
+    .origin-note a { color: var(--color-accent); }
+    .research-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5); }
+    .research-number { display: block; margin-bottom: var(--space-3); color: var(--color-accent); font-size: var(--type-card-title); font-weight: var(--weight-button); }
+    .knowledge-panel { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--space-8); padding: var(--space-8); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-panel); background: var(--color-surface); }
+    .knowledge-panel h2, .mcp-panel h3, .research-panel h3, .routing-panel h3 { margin-top: var(--space-0); }
+    .knowledge-panel p { color: var(--color-text-soft); line-height: var(--line-intro); }
+    .board-preview { display: grid; gap: var(--space-3); align-content: center; }
+    .board-node { padding: var(--space-3) var(--space-4); border: var(--border-width) solid var(--color-border-strong); border-radius: var(--radius-sm); color: var(--color-text-muted); }
+    .board-node:nth-child(2) { margin-left: var(--space-8); border-color: var(--color-accent); color: var(--color-text); }
+    .skill-list, .source-list, .routing-list { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-6); }
+    .skill-list code, .source-list code, .routing-list code, .status-pill { padding: var(--space-2) var(--space-3); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-field); color: var(--color-label); }
+    .status-pill { display: inline-block; margin: var(--space-3) var(--space-0); border-color: var(--color-accent); color: var(--color-accent); font-weight: var(--weight-button); }
+    .comparison-wrap { overflow-x: auto; border: var(--border-width) solid var(--color-border); border-radius: var(--radius-grid); }
+    .comparison { width: var(--full-width); border-collapse: collapse; min-width: var(--hero-width); }
+    .comparison th, .comparison td { padding: var(--space-4); border-bottom: var(--border-width) solid var(--color-border); text-align: left; vertical-align: top; line-height: var(--line-copy); }
+    .comparison th { background: var(--color-surface); color: var(--color-text); }
+    .comparison td { color: var(--color-text-muted); background: var(--color-surface-subtle); }
+    .comparison tr:last-child td { border-bottom: 0; }
+    .comparison td:first-child { color: var(--color-label); font-weight: var(--weight-label); }
+    .tradeoff-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5); }
+    .tradeoff { padding: var(--space-6); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-card); background: var(--color-surface-subtle); }
+    .tradeoff h3 { margin-top: var(--space-0); }
+    .tradeoff ul { margin-bottom: var(--space-0); padding-left: var(--space-5); color: var(--color-text-muted); line-height: var(--line-intro); }
+    .steps { counter-reset: setup; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-5); }
+    .step { padding-top: var(--space-5); border-top: var(--border-width) solid var(--color-border-strong); }
+    .step::before { counter-increment: setup; content: "0" counter(setup); display: block; margin-bottom: var(--space-8); color: var(--color-accent); font-weight: var(--weight-button); }
+    .step h3 { margin: var(--space-0) var(--space-0) var(--space-2); }
+    .step p { margin: var(--space-0); color: var(--color-text-muted); line-height: var(--line-copy); }
+    .download-grid { margin-top: var(--space-8); }
+    .release-note { margin-top: var(--space-5); color: var(--color-text-faint); font-size: var(--type-xs); line-height: var(--line-copy); }
+    .scout-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); margin-top: var(--space-6); }
+    .scout { padding: var(--space-4); border: var(--border-width) solid var(--color-border); border-radius: var(--radius-sm); background: var(--color-surface-subtle); }
+    .scout h4 { margin: var(--space-0) var(--space-0) var(--space-2); font-size: var(--type-body); color: var(--color-text); }
+    .scout p { margin: var(--space-0); color: var(--color-text-muted); line-height: var(--line-copy); }
+    .scout code { display: inline-block; margin-top: var(--space-2); padding: var(--space-1) var(--space-2); border-radius: var(--radius-xs); background: var(--color-field); color: var(--color-label); font-size: var(--type-xs); }
+    [hidden] { display: none !important; }
+    @media (max-width: 760px) {
+      .page-nav { margin-bottom: var(--space-8); }
+      .hero-grid, .section-heading, .knowledge-panel, .research-grid, .tradeoff-grid, .scout-grid { grid-template-columns: 1fr; }
+      .feature-grid, .steps { grid-template-columns: 1fr; }
+      .feature { min-height: auto; }
+      .hero-actions .button { width: var(--full-width); text-align: center; }
+      .board-node:nth-child(2) { margin-left: var(--space-4); }
+    }
+  </style>
+</head>
+<body class="download-page">
+  <main class="download-shell">
+    <nav class="page-nav" aria-label="Settings">
+      <div class="brand"><span class="brand-mark">J</span><span data-i18n-brand>Jcode Lite</span></div>
+      <div class="page-controls">
+        <div class="edition-switch" role="group" aria-label="Edition">
+          <button type="button" data-edition-button="lite" aria-pressed="true">Lite</button>
+          <button type="button" data-edition-button="free" aria-pressed="false">Lite Free</button>
+        </div>
+        <div class="language-switch" role="group" aria-label="Мова / Language">
+          <button type="button" data-language-button="uk" aria-pressed="true">UA</button>
+          <button type="button" data-language-button="en" aria-pressed="false">EN</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ===================== UA · Lite ===================== -->
+    <div data-edition="lite" data-language="uk">
+      <div class="tabs" role="tablist" aria-label="Tabs">
+        <button type="button" role="tab" data-tab="overview" aria-selected="true">Огляд</button>
+        <button type="button" role="tab" data-tab="features" aria-selected="false">Можливості</button>
+        <button type="button" role="tab" data-tab="howto" aria-selected="false">Як почати</button>
+      </div>
+
+      <!-- Tab · Overview -->
+      <section data-tab-panel="overview">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <div class="eyebrow">Jcode Lite · vNext · 0.2.0-beta.1</div>
+            <h1>AI-помічник, який працює всередині ваших папок.</h1>
+            <p class="intro">Відкрийте папку з проєктом, опишіть задачу звичайною мовою — і Jcode може прочитати контекст, знайти потрібні файли, запропонувати план, виконати зміни та перевірити результат. Це наша розширена збірка відкритого <a href="https://github.com/1jehuang/jcode">оригінального Jcode</a>, яка включає Sage-дослідження, 19 бізнес-ролей та автоматичну memory.</p>
+            <div class="hero-actions">
+              <a class="button" href="/jcode-lite/macos/jcode-lite-macos-latest.zip">Завантажити для macOS</a>
+              <a class="button button-secondary" href="/jcode-lite/windows/jcode-lite-windows-latest.zip">Завантажити для Windows</a>
+            </div>
+            <p class="release-note">Доступ до Lite-завантажень захищений PIN-кодом. Lite Free залишається відкритим для завантаження.</p>
+          </div>
+          <aside class="hero-panel" aria-label="Коротко про продукт">
+            <div class="panel-kicker">Коротко</div>
+            <div class="terminal-line"><strong>що це</strong><span>AI-agent для файлів і проєктів</span></div>
+            <div class="terminal-line"><strong>як працює</strong><span>запускається у потрібній папці</span></div>
+            <div class="terminal-line"><strong>AI</strong><span>Stables bundled: готовий до роботи</span></div>
+            <div class="terminal-line"><strong>команда</strong><span><code>jcodel</code> з будь-якої папки</span></div>
+          </aside>
+        </div>
+
+        <section class="section">
+          <div class="section-heading"><h2>Не новий Jcode. Продумана збірка.</h2><p>Ми не переписували сильний open-source інструмент. Ми взяли його ефективний Rust runtime, додали перевірені Sage-дослідження, 19 бізнес-ролей, memory та Knowledge OS — і залишили зрозумілий старт.</p></div>
+          <div class="origin-note"><strong>Основа:</strong> <a href="https://github.com/1jehuang/jcode">jcode by 1jehuang</a>, open source під MIT. <strong>Наша частина:</strong> curated Lite package з Stables routing, Sage-informed runtime, 19 expert skills + 6 workflow-обгорток, Memory з embeddings, Mage, Knowledge OS, PDF-переглядач, headless Playwright. Те саме, що люблять developers, але простіше запускається щодня.</div>
+        </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>Що ми взяли з Sage</h2><p>Sage — це наш дослідницький проєкт, який вивчає, як саме агенти витрачають свій контекст. Ми виміряли, що реально допомагає, і перенесли принципи у поведінку runtime.</p></div>
+          <div class="research-grid">
+            <article class="research-panel"><span class="research-number">≈5×</span><h3>Менше постійних інструкцій</h3><p>У нашому аудиті Sage завантажував близько 9,550 tokens правил постійно, а вибраний Jcode overlay — близько 1,869. Тому ми не переносили Sage wholesale: контекст має йти на вашу задачу, а не на церемонію.</p></article>
+            <article class="research-panel"><span class="research-number">18 / 20</span><h3>Менше повторної роботи</h3><p>У 18 із 20 довгих Sage sessions знайшли дублювання context work. Runtime у цій збірці робить redundant re-reads видимими, обмежує worker execution і стискає completion wakeups.</p></article>
+            <article class="research-panel"><span class="research-number">EVIDENCE</span><h3>Перевіряти ефект, не статус</h3><p>«Tool завершився успішно» не означає, що бажаний результат зʼявився. Принцип — перевіряти реальний output, public interface або файл, який мав змінитися.</p></article>
+            <article class="research-panel"><span class="research-number">REVERSIBLE</span><h3>Зміни мають мати шлях назад</h3><p>Оновлення versioned, config користувача зберігається, є rollback. Складна паралельна робота має бюджети замість безмежного fan-out.</p></article>
+          </div>
+        </section>
+
+        <section class="section knowledge-panel">
+          <div>
+            <div class="eyebrow">Навіщо Memory звичайній людині</div>
+            <h2>Памʼять проєкту без ручної роботи</h2>
+            <p><strong>Memory embeddings</strong> перетворюють ваші нотатки, рішення та контекст на числа, які agent може швидко знаходити. Ви не пишете пошукові запити — agent сам згадує потрібне. <strong>Memory sidecar</strong> — це окремий маленький helper, який стежить за важливими фактами, коли ви працюєте.</p>
+            <p>Простими словами: agent памʼятає, що вирішили минулого тижня, без ручного копіювання в нотатки.</p>
+            <p class="release-note"><strong>Чесно про embeddings:</strong> при першому використанні memory local embeddings можуть прозоро завантажити невелику модель у вашій системі. Це одноразова операція — після неї memory працює локально і без мережі. Ніяких додаткових кроків не потрібно.</p>
+          </div>
+          <div class="board-preview" aria-hidden="true">
+            <div class="board-node">Рішення · architectural choices</div>
+            <div class="board-node">Контекст · чому обрали саме так</div>
+            <div class="board-node">Згадки · relevant facts during work</div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>Робочий процес розробника</h2><p>Lite включає наш повний dev-workflow, який ми самі використовуємо кожен день. Це не вимагає знати Rust чи Git — але якщо знаєте, agent підключиться на цьому рівні.</p></div>
+          <div class="feature-grid">
+            <article class="feature"><span class="feature-index">01 · TDD</span><h3>Спочатку тести</h3><p>Agent пише тест, який описує очікувану поведінку. Потім код, який цей тест проходить. Це значно зменшує «майже працює».</p></article>
+            <article class="feature"><span class="feature-index">02 · VERIFY</span><h3>Перевірка, не віра</h3><p>Кожна зміна має конкретний спосіб перевірки: build, тест, реальний output. Agent не каже «готово», поки ви не побачили результат.</p></article>
+            <article class="feature"><span class="feature-index">03 · REVERT</span><h3>Шлях назад завжди</h3><p>Кожна дія записується у git track. Складна зміна блокується, якщо немає способу її відкотити. Це фіксує багато помилок до того, як вони сталися.</p></article>
+            <article class="feature"><span class="feature-index">04 · DECIDE</span><h3>Чіткі точки рішень</h3><p>Agent сам зупиняється, коли треба ваш вибір між варіантами. Не «приймає рішення за вас», а просить короткий input.</p></article>
+            <article class="feature"><span class="feature-index">05 · DELEGATE</span><h3>Розділяє складну роботу</h3><p>Swarm-механіка може розділити велику задачу між workers із обмеженими runtime budgets і компактними звітами. Головний agent не тоне у деталях.</p></article>
+            <article class="feature"><span class="feature-index">06 · COMMIT</span><h3>Часті коміти — це норма</h3><p>Agent комітить часто й малими порціями зрозумілими повідомленнями. Так легше зрозуміти, що змінилося, і швидко відкотити.</p></article>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>Дослідження з розвідкою</h2><p>Lite вміє запускати <strong>scouts</strong> — маленькі спеціалізовані агенти, які швидко збирають інформацію перед тим, як головний agent вирішує. Кожен scout має свою сферу і повертає короткий, цитований звіт.</p></div>
+          <div class="scout-grid">
+            <article class="scout"><h4>AgentGrep · розвідка у вашому коді</h4><p>Швидко шукає у файлах, зв'язує знахідки з конкретними шматками коду, цитує рядки. Коли задача про ваш проєкт — починає звідси.</p><code>agent_grep · regex/path aware</code></article>
+            <article class="scout"><h4>OmniSearch · веб-розвідка</h4><p>Шукає у відкритому вебі, документації, статтях. Вибирає джерела, які реально відповідають запиту, а не перші у видачі.</p><code>omnisearch · brave / tavily / kagi</code></article>
+            <article class="scout"><h4>Context7 · актуальна документація</h4><p>Підтягує свіжу документацію бібліотек прямо з їхніх репозиторіїв. Не застарілі туторіали з 2021, а те, що зараз у main.</p><code>context7 · library docs sync</code></article>
+            <article class="scout"><h4>Reddit · голоси спільнот</h4><p>Збирає обговорення з профільних сабреддітів, де реальні користувачі діляться досвідом і проблемами. Цитує джерела, розрізняє думку і факт.</p><code>reddit · community signal</code></article>
+          </div>
+        </section>
+      </section>
+
+      <!-- Tab · Features -->
+      <section data-tab-panel="features" hidden>
+        <section>
+          <div class="section-heading"><h2>19 бізнес-ролей + 6 workflow-обгорток</h2><p>У Lite bundled повний набір спеціалізованих ролей, які говорять голосами конкретних професій: фінансист, клієнт, конкурент, етик, продавець, антрополог. Workflow-обгортки — це готові сценарії, які збирають кілька ролей у раду навколо одного рішення.</p></div>
+          <div class="skill-list" aria-label="19 бізнес-ролей"><code>cfo</code><code>client</code><code>competitor</code><code>ethics</code><code>seller</code><code>anthropologist</code><code>investor</code><code>pe-analyst</code><code>journalist</code><code>mentor</code><code>stoic</code><code>energy</code><code>statistician</code><code>system-architect</code><code>first-principles</code><code>wanderer</code><code>skeptic</code><code>taleb</code><code>compass</code></div>
+          <div class="skill-list" aria-label="6 workflow-обгорток"><code>synthesis</code><code>compass</code><code>debate</code><code>decision-board</code><code>idea-forge</code><code>ops-diagnosis</code></div>
+          <p class="release-note">Workflow-обгортки не окремі AI — це інструкції, як кілька ролей запускаються паралельно і як їх синтезувати в одне рішення. Це дає вам «раду директорів» за одну команду, а не десяток окремих запитів.</p>
+        </section>
+
+        <section class="section knowledge-panel">
+          <div>
+            <div class="eyebrow">Навіщо Mage звичайній людині</div>
+            <h2>Карта проєкту замість стіни тексту</h2>
+            <p><strong>Mage</strong> перетворює структурований опис проєкту на clickable HTML board. На ньому видно цілі, частини системи, workflows, залежності та звʼязки. Це допомагає відповісти на прості питання: що ми будуємо, як усе повʼязано і де робота заблокована.</p>
+            <p><strong>Knowledge OS</strong> — це schema та templates, на яких тримається ця карта. Вам не потрібно вивчати їх заздалегідь: agent може допомогти створити formation board, а Mage перевіряє його і експортує візуальне представлення.</p>
+            <div class="skill-list" aria-label="Додаткові skills"><code>mage</code><code>frontend-design</code><code>design-variants</code><code>component-stress</code><code>motion-review</code><code>scroll-craft</code><code>landing-page</code><code>howtos</code><code>consolidate-memory</code><code>clipify</code></div>
+          </div>
+          <div class="board-preview" aria-hidden="true">
+            <div class="board-node">Мета · який результат потрібен</div>
+            <div class="board-node">Workflow · як до нього дійти</div>
+            <div class="board-node">Система · що від чого залежить</div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>Документи та браузер</h2><p>Lite додає два прості, але коштовні інструменти для реальної роботи з файлами та інтернетом — без ручного копіювання.</p></div>
+          <div class="feature-grid">
+            <article class="feature"><span class="feature-index">01 · PDF</span><h3>Читання PDF всередині проєкту</h3><p>Agent може відкривати PDF прямо з папки, витягати текст і працювати з ним. Жодного «спочатку конвертуйте у txt».</p></article>
+            <article class="feature"><span class="feature-index">02 · PDF OUT</span><h3>Генерація PDF-звітів</h3><p>Завершена робота може бути оформлена у PDF звіт зі структурою. Корисно для документації, яку треба надіслати іншим.</p></article>
+            <article class="feature"><span class="feature-index">03 · BROWSER</span><h3>Headless Playwright</h3><p>Agent може відкрити сторінку у вашому встановленому Chrome/Edge в ізольованому headless режимі, виконати дії та перевірити результат. Це ваш «QA-асистент», який тестує веб-сторінки за вас.</p></article>
+            <article class="feature"><span class="research-number">04 · SCREENSHOT</span><h3>Скріншоти без браузера</h3><p>Lite може зробити скріншот сторінки у headless режимі і зберегти у файл. Для перевірки UI без ручного відкриття.</p></article>
+            <article class="feature"><span class="feature-index">05 · FORM</span><h3>Заповнення форм</h3><p>Agent може заповнити складну веб-форму за вас — корисно для тестування внутрішніх інструментів або повторюваних задач.</p></article>
+            <article class="feature"><span class="feature-index">06 · COMPARE</span><h3>Візуальна верифікація</h3><p>Знімок до і після зміни — agent порівнює і каже, чи справді UI виглядає так, як ви просили.</p></article>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>MCP та зовнішні сервіси</h2><p>MCP дозволяє agent підключати додаткові інструменти — Notion, Reddit, OmniSearch, Lerim, Magic UI, тощо. Ви керуєте, які з них активні.</p></div>
+          <div class="mcp-panel">
+            <div class="panel-kicker">Підключено за замовчуванням</div>
+            <span class="status-pill">0 external MCP · все під вашим контролем</span>
+            <p>Lite підтримує user-configured <strong>stdio MCP</strong> і може читати конфігурацію з власного <code>mcp.json</code>, project-local <code>.jcode/mcp.json</code> або <code>.mcp.json</code>, а також сумісні конфіги Codex CLI. Ви самі вирішуєте, які ключі додати.</p>
+            <div class="source-list" aria-label="Підтримувані джерела MCP"><code>Notion</code><code>Reddit</code><code>OmniSearch</code><code>Context7</code><code>Lerim memory</code><code>Pencil</code><code>Magic UI</code><code>Playwright</code></div>
+            <p class="release-note">Більшість MCP працюють одразу. <strong>Reddit bundled</strong> — anonymous-first через public RSS: subreddit browsing без setup. <strong>Reddit credentials</strong> (free) розблоковують search, comments, user analysis і вищі ліміти. <strong>Notion, OmniSearch, Lerim memory</strong> потребують власних API ключів. Ці ключі ви додаєте самі у своєму config — Lite не зберігає чужих credentials.</p>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>Original Jcode чи Jcode Lite?</h2><p>Обидва зроблені на одному runtime. Lite додає готові skills, memory і дослідницькі інструменти — Original дає повну свободу зібрати свій stack.</p></div>
+          <div class="comparison-wrap"><table class="comparison">
+            <thead><tr><th>Питання</th><th><a href="https://github.com/1jehuang/jcode">Original Jcode</a></th><th>Jcode Lite</th></tr></thead>
+            <tbody>
+              <tr><td>Audience</td><td>Developers і power users, які хочуть повний контроль.</td><td>Generalists і non-tech users, яким потрібен curated старт + advanced skills.</td></tr>
+              <tr><td>AI provider</td><td>Великий вибір login flows та provider profiles.</td><td>Stables bundled: MiniMax M3 як main brain, MiniMax M2.7 Highspeed для швидких задач. Можна підключити свій provider.</td></tr>
+              <tr><td>Scope</td><td>Повний runtime із ширшими optional features.</td><td>Release-LTO runtime без Bedrock features, але з PDF, headless Playwright, Mage, KOS.</td></tr>
+              <tr><td>Memory</td><td>Local embeddings та automatic memory sidecar доступні.</td><td>Memory embeddings + memory sidecar bundled і увімкнені за замовчуванням.</td></tr>
+              <tr><td>Mage / Knowledge OS</td><td>Залежить від вашого setup.</td><td>Skill, templates, schema та portable renderer уже bundled.</td></tr>
+              <tr><td>Skills</td><td>Гнучкий user/project skill setup.</td><td>19 бізнес-ролей + 6 workflow-обгорток + 6 utility skills bundled.</td></tr>
+              <tr><td>Research</td><td>Tooling потрібно підключати.</td><td>AgentGrep, OmniSearch, Context7, Reddit — bundled та доступні зі старту.</td></tr>
+              <tr><td>Browser work</td><td>Потрібен окремий setup.</td><td>Headless Playwright вбудований, працює одразу після install.</td></tr>
+              <tr><td>PDF</td><td>Reader/write не увімкнено у release build.</td><td>PDF reader і writer увімкнені.</td></tr>
+              <tr><td>MCP</td><td>Configurable stdio MCP support.</td><td>Та сама підтримка, with optional service keys за вашим вибором.</td></tr>
+              <tr><td>Platforms</td><td>Linux, macOS і Windows.</td><td>macOS universal та Windows x64.</td></tr>
+              <tr><td>Updates</td><td>Офіційний upstream update path.</td><td>Наші versioned package updates із config preservation та rollback.</td></tr>
+            </tbody>
+          </table></div>
+        </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>Чесні trade-offs</h2><p>Lite дає більше одразу, але install важчий, ніж Lite Free. Це перевага не для кожного.</p></div>
+          <div class="tradeoff-grid">
+            <article class="tradeoff"><h3>Коли обрати Lite</h3><ul><li>Хочете Stables bundled без власного provider.</li><li>Потрібні 19 бізнес-ролей та 6 workflow-обгорток.</li><li>Memory з embeddings і sidecar мають працювати одразу.</li><li>Mage, Knowledge OS, headless Playwright і PDF із коробки.</li></ul></article>
+            <article class="tradeoff"><h3>Коли краще Lite Free або Original</h3><ul><li>Хочете свого provider — оберіть Lite Free.</li><li>Потрібен Linux або full-feature build — оберіть Original Jcode.</li><li>Не хочете extra install size — Lite Free помітно легший.</li></ul></article>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>Чесні обмеження</h2><p>Це речі, які треба знати перед install. Ми не приховуємо, що Lite — це більше, ніж Lite Free.</p></div>
+          <div class="cons-panel">
+            <ul>
+              <li><strong>Розмір інсталяції більший.</strong> У Lite bundled Stables routing, 19 skills, memory embeddings, Mage, Knowledge OS, PDF, Playwright. Завантажений архів помітно більший за Lite Free.</li>
+              <li><strong>Node.js 20 або новіший потрібен</strong> для Mage і Knowledge OS.</li>
+              <li><strong>Системний браузер потрібен.</strong> Headless Playwright використовує ваш встановлений Chrome або Edge в ізольованому режимі. Lite не постачає власний браузер — потрібен стабільний локальний браузер.</li>
+              <li><strong>Опціональні MCP service keys.</strong> <strong>Reddit bundled</strong> — anonymous-first: працює без setup для subreddit browsing через public RSS. <strong>Reddit credentials</strong> (free) — це додатковий unlock для search, comments, user analysis і вищих лімітів. <strong>Notion, OmniSearch, Lerim memory</strong> потребують власних API ключів для повної функціональності.</li>
+              <li><strong>Stables bundled = вищий поріг прозорості.</strong> Якщо ви не хочете, щоб хтось платив за ваш AI — оберіть Lite Free.</li>
+            </ul>
+          </div>
+        </section>
+      </section>
+
+      <!-- Tab · How to Use -->
+      <section data-tab-panel="howto" hidden>
+        <section>
+          <div class="section-heading"><h2>Три кроки до першої задачі</h2><p>Після install Lite одразу готовий — без додаткового provider setup, бо Stables вже bundled.</p></div>
+          <div class="steps">
+            <article class="step"><h3>Завантажте</h3><p>Package для macOS на Apple Silicon або 64-bit package для Windows 10+.</p></article>
+            <article class="step"><h3>Запустіть installer</h3><p><code>jcode-lite.command</code> на macOS або <code>install.cmd</code> на Windows. Installer покладе усе у ізольовану папку.</p></article>
+            <article class="step"><h3>Перша задача</h3><p>Відкрийте Terminal у потрібній папці та введіть <code>jcodel</code>. Опишіть задачу звичайною мовою — agent одразу готовий.</p></article>
+          </div>
+          <div class="download-grid">
+            <article class="card"><h2>macOS</h2><p>Apple Silicon (M1 і новіші). Потребує Node.js 20+.</p><a class="button" href="/jcode-lite/macos/jcode-lite-macos-latest.zip">Завантажити macOS</a></article>
+            <article class="card"><h2>Windows</h2><p>64-bit Windows 10 або новіша. Потребує Node.js 20+.</p><a class="button" href="/jcode-lite/windows/jcode-lite-windows-latest.zip">Завантажити Windows</a></article>
+          </div>
+          <p class="release-note">Stables bundled. Жодного додаткового provider setup, API key, OAuth token, чи default model не потрібно.</p>
+        </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>Stables routing у Lite</h2><p>Lite використовує наш Stables routing. Головний brain — MiniMax M3, швидкі механічні задачі йдуть на MiniMax M2.7 Highspeed. Це налаштування за замовчуванням, а не обмеження: ви можете підключити власний provider і обрати будь-яку модель.</p></div>
+          <div class="routing-panel">
+            <div class="panel-kicker">Маршрутизація моделей</div>
+            <div class="terminal-line"><strong>main</strong><span>MiniMax M3 <code>minimax/M3</code> через Stables (головний brain усіх задач)</span></div>
+            <div class="terminal-line"><strong>scout</strong><span>MiniMax M3 <code>minimax/M3</code> через Stables (пошук у коді, читання файлів, research)</span></div>
+            <div class="terminal-line"><strong>speed</strong><span>MiniMax M2.7 Highspeed <code>minimax/M2.7-highspeed</code> через Stables (швидкі механічні задачі)</span></div>
+            <div class="terminal-line"><strong>volume</strong><span>MiniMax M3 <code>minimax/M3</code> через Stables (масштабні routine операції)</span></div>
+            <p>Все це працює «з коробки» — користувач не бачить складності маршрутизації, але отримує правильну модель для правильної задачі.</p>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>Хочете Lite Free?</h2><p>Якщо вам потрібен свій provider або ви не хочете Stables — оберіть Lite Free. Той самий досвід, але provider підключаєте ви самі.</p></div>
+          <p><a class="button button-secondary" href="#lite-free" data-jump-edition="free">Перейти на Lite Free</a></p>
+        </section>
+      </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>Якщо щось не працює</h2><p>Найчастіші ситуації та що з ними робити. Той самий список є у файлі <code>START-HERE.md</code> усередині архіву.</p></div>
+          <div class="routing-panel">
+            <div class="terminal-line"><strong>«requires Node.js 20 or newer»</strong><span>Встановіть LTS-версію з <a href="https://nodejs.org">nodejs.org</a>, закрийте та відкрийте термінал заново.</span></div>
+            <div class="terminal-line"><strong>macOS: «unidentified developer»</strong><span>Правий клік на файлі → <strong>Open</strong> → ще раз <strong>Open</strong>. Робиться один раз.</span></div>
+            <div class="terminal-line"><strong>Windows: синє вікно SmartScreen</strong><span>Натисніть <strong>More info</strong>, потім <strong>Run anyway</strong>.</span></div>
+            <div class="terminal-line"><strong>Вікно відкривається і одразу закривається</strong><span>Спочатку відкрийте термінал, перетягніть у нього <code>jcode-lite</code> і натисніть Enter — тоді помилка залишиться на екрані.</span></div>
+            <div class="terminal-line"><strong>«Stables access is not configured»</strong><span>Запустіть <code>setup-key.command</code> (macOS) або <code>setup-key.ps1</code> (Windows) і вставте виданий ключ.</span></div>
+            <div class="terminal-line"><strong>«Rate limited» / вичерпано ліміт</strong><span>Lite сам запропонує перемкнутися на іншу доступну модель через 3 секунди (Esc — залишитись). Або введіть <code>/model</code>.</span></div>
+            <div class="terminal-line"><strong>Відповідає, але погано</strong><span>Дайте більше контексту: вкажіть конкретний файл чи папку, вставте точний текст помилки і напишіть, чого ви очікували.</span></div>
+          </div>
+          <p class="release-note">Не спрацювало? Напишіть на <a href="mailto:daniil.kovaliov@gmail.com">daniil.kovaliov@gmail.com</a> — вкажіть, що робили, чого очікували, і точний текст помилки (скріншот теж підійде).</p>
+        </section>
+
+      <footer>Jcode Lite · vNext · Built on <a href="https://github.com/1jehuang/jcode">open-source Jcode</a> · LeGrin public beta</footer>
+    </div>
+
+    <!-- ===================== UA · Lite Free ===================== -->
+    <div data-edition="free" data-language="uk" hidden>
+      <div class="tabs" role="tablist" aria-label="Tabs">
+        <button type="button" role="tab" data-tab="overview" aria-selected="true">Огляд</button>
+        <button type="button" role="tab" data-tab="features" aria-selected="false">Можливості</button>
+        <button type="button" role="tab" data-tab="howto" aria-selected="false">Як почати</button>
+      </div>
+
+      <section data-tab-panel="overview">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <div class="eyebrow">Jcode Lite Free · vNext · 0.2.0-beta.1</div>
+            <h1>AI-помічник без bundled AI.</h1>
+            <p class="intro">Те саме середовище Jcode, що й у Lite, але без Stables. Ви підключаєте власного провайдера і користуєтесь тим самим досвідом. Foundation — <a href="https://github.com/1jehuang/jcode">оригінальний Jcode</a>, open source під MIT.</p>
+            <div class="hero-actions">
+              <a class="button" href="/jcode-lite-free/macos/jcode-lite-free-macos-latest.zip">Завантажити для macOS</a>
+              <a class="button button-secondary" href="/jcode-lite-free/windows/jcode-lite-free-windows-latest.zip">Завантажити для Windows</a>
+            </div>
+          </div>
+          <aside class="hero-panel" aria-label="Коротко про продукт">
+            <div class="panel-kicker">Коротко</div>
+            <div class="terminal-line"><strong>що це</strong><span>AI-agent для файлів і проєктів</span></div>
+            <div class="terminal-line"><strong>як працює</strong><span>запускається у потрібній папці</span></div>
+            <div class="terminal-line"><strong>AI</strong><span>ви підключаєте власного провайдера</span></div>
+            <div class="terminal-line"><strong>команда</strong><span><code>jcodef</code> з будь-якої папки</span></div>
+          </aside>
+        </div>
+
+        <section class="section">
+          <div class="section-heading"><h2>Чесно про Lite Free</h2><p>Lite Free — це Lite без Stables. Той самий runtime, ті самі skills, та сама Mage і Knowledge OS. Різниця лише в одному: немає bundled AI, тож ви підключаєте власного провайдера.</p></div>
+          <div class="cons-panel">
+            <ul>
+              <li><strong>Без bundled AI.</strong> Після install ви пройдете provider onboarding — оберете свій акаунт, введете ключ або OAuth.</li>
+              <li><strong>Provider setup потрібен перед першою задачею.</strong> Lite Free не запустить жодну команду, поки provider не налаштований.</li>
+              <li><strong>Без обмежень на provider.</strong> Lite Free підтримує тих самих провайдерів, що й Original Jcode — вибір за вами.</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>Що спільного з Lite</h2><p>Усе, крім Stables. Sage-derived принципи, Mage, Knowledge OS, PDF, headless Playwright, 19 бізнес-ролей — усе це працює так само, як у Lite. Ви просто додаєте свого провайдера замість bundled.</p></div>
+          <div class="feature-grid">
+            <article class="feature"><span class="feature-index">01 · SAGE</span><h3>Ті самі принципи</h3><p>5× менше постійних інструкцій, evidence-based verification, reversible зміни. Все це у Lite Free теж.</p></article>
+            <article class="feature"><span class="feature-index">02 · ROLES</span><h3>19 бізнес-ролей + 6 wrapper-ів</h3><p>CFO, Client, Skeptic, Taleb та інші ролі працюють. Wrapper-и як synthesis, decision-board, idea-forge також.</p></article>
+            <article class="feature"><span class="feature-index">03 · MEMORY</span><h3>Memory embeddings + sidecar</h3><p>Ті самі memory tools. Ви просто підключаєте провайдера, який їх підтримує.</p></article>
+            <article class="feature"><span class="feature-index">04 · MAGE</span><h3>Mage + Knowledge OS</h3><p>Skill, templates, schema та portable renderer bundled однаково. Карта проєкту доступна одразу.</p></article>
+            <article class="feature"><span class="feature-index">05 · PDF</span><h3>PDF і Playwright</h3><p>PDF reader/writer і headless Playwright працюють так само — просто запустіть Lite Free з вашим provider.</p></article>
+            <article class="feature"><span class="feature-index">06 · WORKFLOW</span><h3>Той самий dev-workflow</h3><p>TDD, verify, revert, decide, delegate, commit — усе це працює однаково у Lite Free.</p></article>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>Original Jcode чи Jcode Lite Free?</h2><p>Lite Free — це Lite без bundled AI. Original Jcode — це Lite Free без наших curated skills. Обирайте за рівнем свободи.</p></div>
+          <div class="comparison-wrap"><table class="comparison">
+            <thead><tr><th>Питання</th><th><a href="https://github.com/1jehuang/jcode">Original Jcode</a></th><th>Jcode Lite Free</th><th>Jcode Lite</th></tr></thead>
+            <tbody>
+              <tr><td>AI provider</td><td>Будь-який підтримуваний.</td><td>Будь-який підтримуваний, ви підключаєте самі.</td><td>Stables bundled, ваш вибір не потрібен.</td></tr>
+              <tr><td>Skills</td><td>Гнучкий власний setup.</td><td>19 ролей + 6 wrapper-ів bundled.</td><td>19 ролей + 6 wrapper-ів bundled.</td></tr>
+              <tr><td>Memory</td><td>Залежить від setup.</td><td>Memory embeddings + sidecar доступні.</td><td>Memory embeddings + sidecar увімкнені.</td></tr>
+              <tr><td>Mage / KOS</td><td>Залежить від setup.</td><td>Bundled.</td><td>Bundled.</td></tr>
+              <tr><td>PDF / Playwright</td><td>Залежить від build.</td><td>Увімкнено.</td><td>Увімкнено.</td></tr>
+              <tr><td>Розмір</td><td>Базовий.</td><td>Середній — без Stables, але з skills.</td><td>Найбільший — Stables bundled.</td></tr>
+              <tr><td>Platforms</td><td>Linux, macOS, Windows.</td><td>macOS universal, Windows x64.</td><td>macOS universal, Windows x64.</td></tr>
+            </tbody>
+          </table></div>
+        </section>
+      </section>
+
+      <section data-tab-panel="features" hidden>
+        <section>
+          <div class="section-heading"><h2>Ті самі можливості, свій провайдер</h2><p>У Lite Free bundled усе, що й у Lite, крім Stables. Provider onboarding ви проходите один раз — далі працюєте без обмежень.</p></div>
+          <div class="feature-grid">
+            <article class="feature"><span class="feature-index">01 · SCOUTS</span><h3>AgentGrep · OmniSearch · Context7 · Reddit</h3><p>Ті самі чотири розвідники. Працюють однаково, бо не залежать від конкретного провайдера.</p></article>
+            <article class="feature"><span class="feature-index">02 · MEMORY</span><h3>Memory embeddings + sidecar</h3><p>Ті самі memory tools. Деякі провайдери мають власні embeddings — agent адаптується.</p></article>
+            <article class="feature"><span class="feature-index">03 · SKILLS</span><h3>19 ролей + 6 wrapper-ів</h3><p>CFO, Client, Competitor, Skeptic, Taleb та інші — bundled. Wrapper-и synthesis, decision-board, idea-forge та інші.</p></article>
+            <article class="feature"><span class="feature-index">04 · MAGE</span><h3>Mage + Knowledge OS</h3><p>Project map замість стіни тексту. Skill, templates, schema, portable renderer — все bundled.</p></article>
+            <article class="feature"><span class="feature-index">05 · PDF</span><h3>PDF reader і writer</h3><p>Працює одразу після install. Не залежить від провайдера.</p></article>
+            <article class="feature"><span class="feature-index">06 · PLAYWRIGHT</span><h3>Headless Playwright</h3><p>Запускає ваш Chrome/Edge в ізольованому headless режимі, робить скріншоти, заповнює форми. Працює у Lite Free так само.</p></article>
+          </div>
+        </section>
+      </section>
+
+      <section data-tab-panel="howto" hidden>
+        <section>
+          <div class="section-heading"><h2>Три кроки до першої задачі</h2><p>Головна різниця з Lite — provider onboarding ви проходите самі. Це декілька хвилин, і це єдиний обов'язковий setup.</p></div>
+          <div class="steps">
+            <article class="step"><h3>Завантажте</h3><p>Package для macOS на Apple Silicon або 64-bit package для Windows 10+.</p></article>
+            <article class="step"><h3>Запустіть installer</h3><p><code>jcode-free.command</code> на macOS або <code>install.cmd</code> на Windows.</p></article>
+            <article class="step"><h3>Підключіть AI</h3><p>Пройдіть provider onboarding — оберіть свій сервіс, введіть ключ або OAuth. Після цього <code>jcodef</code> готовий.</p></article>
+          </div>
+          <div class="download-grid">
+            <article class="card"><h2>macOS</h2><p>Apple Silicon (M1 і новіші). Потребує Node.js 20+ для Mage.</p><a class="button" href="/jcode-lite-free/macos/jcode-lite-free-macos-latest.zip">Завантажити macOS</a></article>
+            <article class="card"><h2>Windows</h2><p>64-bit Windows 10 або новіша. Потребує Node.js 20+ для Mage.</p><a class="button" href="/jcode-lite-free/windows/jcode-lite-free-windows-latest.zip">Завантажити Windows</a></article>
+          </div>
+          <p class="release-note">Provider usage і cost залежать від вашого акаунта. Lite Free не зберігає ваших ключів — вони у вашому config.</p>
+        </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>Хочете Lite?</h2><p>Якщо хочете, щоб AI був вже з коробки — оберіть Lite. Той самий досвід, але Stables bundled.</p></div>
+          <p><a class="button button-secondary" href="#lite" data-jump-edition="lite">Перейти на Lite</a></p>
+        </section>
+      </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>Якщо щось не працює</h2><p>Найчастіші ситуації та що з ними робити. Той самий список є у файлі <code>START-HERE.md</code> усередині архіву.</p></div>
+          <div class="routing-panel">
+            <div class="terminal-line"><strong>«requires Node.js 20 or newer»</strong><span>Встановіть LTS-версію з <a href="https://nodejs.org">nodejs.org</a>, закрийте та відкрийте термінал заново.</span></div>
+            <div class="terminal-line"><strong>macOS: «unidentified developer»</strong><span>Правий клік на файлі → <strong>Open</strong> → ще раз <strong>Open</strong>. Робиться один раз.</span></div>
+            <div class="terminal-line"><strong>Windows: синє вікно SmartScreen</strong><span>Натисніть <strong>More info</strong>, потім <strong>Run anyway</strong>.</span></div>
+            <div class="terminal-line"><strong>Вікно відкривається і одразу закривається</strong><span>Спочатку відкрийте термінал, перетягніть у нього <code>jcode-free</code> і натисніть Enter — тоді помилка залишиться на екрані.</span></div>
+            <div class="terminal-line"><strong>«No provider configured»</strong><span>Ви ще не підключили акаунт або сесія протермінувалася. Введіть <code>/login</code> і оберіть свого provider.</span></div>
+            <div class="terminal-line"><strong>«Invalid API key»</strong><span>Ключ введено з помилкою, відкликано або протерміновано. Запустіть <code>/login</code> ще раз.</span></div>
+            <div class="terminal-line"><strong>«Rate limited» / вичерпано ліміт</strong><span>Ваш власний акаунт вичерпав ліміт. Зачекайте на відновлення або введіть <code>/model</code> і оберіть іншого підключеного provider.</span></div>
+            <div class="terminal-line"><strong>Відповідає, але погано</strong><span>Дайте більше контексту: вкажіть конкретний файл чи папку, вставте точний текст помилки і напишіть, чого ви очікували.</span></div>
+          </div>
+          <p class="release-note">Не спрацювало? Напишіть на <a href="mailto:daniil.kovaliov@gmail.com">daniil.kovaliov@gmail.com</a> — вкажіть, що робили, чого очікували, і точний текст помилки (скріншот теж підійде).</p>
+        </section>
+
+      <footer>Jcode Lite Free · vNext · Built on <a href="https://github.com/1jehuang/jcode">open-source Jcode</a> · LeGrin public beta</footer>
+    </div>
+
+    <!-- ===================== EN · Lite ===================== -->
+    <div data-edition="lite" data-language="en" hidden>
+      <div class="tabs" role="tablist" aria-label="Tabs">
+        <button type="button" role="tab" data-tab="overview" aria-selected="true">Overview</button>
+        <button type="button" role="tab" data-tab="features" aria-selected="false">Features</button>
+        <button type="button" role="tab" data-tab="howto" aria-selected="false">How to Use</button>
+      </div>
+
+      <section data-tab-panel="overview">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <div class="eyebrow">Jcode Lite · vNext · 0.2.0-beta.1</div>
+            <h1>An AI teammate that works inside your folders.</h1>
+            <p class="intro">Open a project folder, describe the task in ordinary language, and Jcode can read the context, find relevant files, propose a plan, make changes, and verify the outcome. This is our expanded distribution of the open-source <a href="https://github.com/1jehuang/jcode">original Jcode</a> with Sage research, 19 business roles, and automatic memory.</p>
+            <div class="hero-actions">
+              <a class="button" href="/jcode-lite/macos/jcode-lite-macos-latest.zip">Download for macOS</a>
+              <a class="button button-secondary" href="/jcode-lite/windows/jcode-lite-windows-latest.zip">Download for Windows</a>
+            </div>
+            <p class="release-note">Lite downloads are PIN-protected. Lite Free remains publicly downloadable.</p>
+          </div>
+          <aside class="hero-panel" aria-label="Product summary"><div class="panel-kicker">In short</div><div class="terminal-line"><strong>what</strong><span>AI agent for files and projects</span></div><div class="terminal-line"><strong>how</strong><span>runs in the folder you choose</span></div><div class="terminal-line"><strong>AI</strong><span>Stables bundled, ready to go</span></div><div class="terminal-line"><strong>command</strong><span><code>jcodel</code> from any folder</span></div></aside>
+        </div>
+
+        <section class="section">
+          <div class="section-heading"><h2>Not a new Jcode. A considered distribution.</h2><p>We did not rewrite a strong open-source tool. We kept its efficient Rust runtime, added verified Sage research, 19 business roles, and automatic memory — and made the starting path clearer.</p></div>
+          <div class="origin-note"><strong>Foundation:</strong> <a href="https://github.com/1jehuang/jcode">jcode by 1jehuang</a>, open source under MIT. <strong>Our layer:</strong> curated Lite package with Stables routing, Sage-informed runtime, 19 expert skills + 6 workflow wrappers, Memory with embeddings, Mage, Knowledge OS, PDF reader, headless Playwright.</div>
+        </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>What we kept from Sage</h2><p>Sage is our research project that studies how agents spend their context. We measured what helps and moved the principles into runtime behavior.</p></div>
+          <div class="research-grid">
+            <article class="research-panel"><span class="research-number">≈5×</span><h3>Less permanent instruction overhead</h3><p>Our audit measured about 9,550 always-loaded tokens for Sage rules versus about 1,869 for the selected Jcode overlay. We did not port Sage wholesale: context should be spent on your task, not ceremony.</p></article>
+            <article class="research-panel"><span class="research-number">18 / 20</span><h3>Less repeated work</h3><p>18 of 20 long Sage sessions contained duplicated context work. This runtime surfaces redundant re-reads, bounds worker execution, and keeps completion wakeups compact.</p></article>
+            <article class="research-panel"><span class="research-number">EVIDENCE</span><h3>Verify the effect, not the status</h3><p>A successful tool response does not prove the intended outcome exists. The operating principle is to check the real output, public interface, or changed file.</p></article>
+            <article class="research-panel"><span class="research-number">REVERSIBLE</span><h3>Changes need a way back</h3><p>Updates are versioned, recipient config is preserved, and rollback is included. Parallel work has budgets instead of unlimited fan-out.</p></article>
+          </div>
+        </section>
+
+        <section class="section knowledge-panel">
+          <div>
+            <div class="eyebrow">Why Memory matters to a normal person</div>
+            <h2>Project memory without the busywork</h2>
+            <p><strong>Memory embeddings</strong> turn your notes, decisions, and context into numbers the agent can search quickly. You do not write search queries — the agent remembers what is relevant. <strong>Memory sidecar</strong> is a small helper that watches for important facts as you work.</p>
+            <p>In plain words: the agent remembers what you decided last week without manually copying it into notes.</p>
+            <p class="release-note"><strong>Honest note on embeddings:</strong> local embeddings may perform a transparent one-time model download on first memory use. This is standard for local memory — nothing extra to configure. After that, memory runs locally and offline.</p>
+          </div>
+          <div class="board-preview" aria-hidden="true">
+            <div class="board-node">Decisions · architectural choices</div>
+            <div class="board-node">Context · why we chose this</div>
+            <div class="board-node">Recalls · relevant facts at work time</div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>Developer workflow</h2><p>Lite includes our full dev-workflow that we use every day. It does not require knowing Rust or Git — but if you do, the agent connects at that level.</p></div>
+          <div class="feature-grid">
+            <article class="feature"><span class="feature-index">01 · TDD</span><h3>Tests first</h3><p>The agent writes a test that describes the expected behavior. Then the code that makes the test pass. This removes a lot of "almost works."</p></article>
+            <article class="feature"><span class="feature-index">02 · VERIFY</span><h3>Check, don't trust</h3><p>Every change has a concrete way to verify: build, test, real output. The agent does not say "done" until you see the result.</p></article>
+            <article class="feature"><span class="feature-index">03 · REVERT</span><h3>There is always a way back</h3><p>Every action lands in git track. Complex changes are blocked without a way to roll back. This fixes many errors before they happen.</p></article>
+            <article class="feature"><span class="feature-index">04 · DECIDE</span><h3>Clear decision points</h3><p>The agent stops and asks for your input between options. It does not "decide for you" — it asks for a short choice.</p></article>
+            <article class="feature"><span class="feature-index">05 · DELEGATE</span><h3>Divides complex work</h3><p>Swarm mechanics split a large task between workers with bounded runtime budgets and compact reports. The main agent does not drown in details.</p></article>
+            <article class="feature"><span class="feature-index">06 · COMMIT</span><h3>Frequent small commits</h3><p>The agent commits often in small, readable chunks. Easier to see what changed, faster to roll back if needed.</p></article>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>Research with scouts</h2><p>Lite can launch <strong>scouts</strong> — small specialized agents that gather information quickly before the main agent decides. Each scout has its own domain and returns a short cited report.</p></div>
+          <div class="scout-grid">
+            <article class="scout"><h4>AgentGrep · code reconnaissance</h4><p>Quickly searches your files, ties findings to specific code chunks, cites line ranges. When the task is about your project — start here.</p><code>agent_grep · regex/path aware</code></article>
+            <article class="scout"><h4>OmniSearch · web reconnaissance</h4><p>Searches open web, documentation, articles. Picks sources that match the query, not the first in the result list.</p><code>omnisearch · brave / tavily / kagi</code></article>
+            <article class="scout"><h4>Context7 · up-to-date docs</h4><p>Pulls fresh library docs straight from their repos. Not 2021 tutorials — what is in main today.</p><code>context7 · library docs sync</code></article>
+            <article class="scout"><h4>Reddit · community voices</h4><p>Gathers discussions from topic subreddits where real users share what works and what does not. Cites sources, distinguishes opinion from fact.</p><code>reddit · community signal</code></article>
+          </div>
+        </section>
+      </section>
+
+      <section data-tab-panel="features" hidden>
+        <section>
+          <div class="section-heading"><h2>19 business roles + 6 workflow wrappers</h2><p>Lite bundles the full set of specialized business voices: financial expert, client voice, competitor, ethicist, seller, anthropologist. Workflow wrappers are ready scenarios that assemble several roles into a council around one decision.</p></div>
+          <div class="skill-list" aria-label="19 business roles"><code>cfo</code><code>client</code><code>competitor</code><code>ethics</code><code>seller</code><code>anthropologist</code><code>investor</code><code>pe-analyst</code><code>journalist</code><code>mentor</code><code>stoic</code><code>energy</code><code>statistician</code><code>system-architect</code><code>first-principles</code><code>wanderer</code><code>skeptic</code><code>taleb</code><code>compass</code></div>
+          <div class="skill-list" aria-label="6 workflow wrappers"><code>synthesis</code><code>compass</code><code>debate</code><code>decision-board</code><code>idea-forge</code><code>ops-diagnosis</code></div>
+          <p class="release-note">Workflow wrappers are not separate AIs — they are instructions for how several roles run in parallel and how their outputs are synthesized. You get a "board of directors" with one command instead of dozens of separate prompts.</p>
+        </section>
+
+        <section class="section knowledge-panel">
+          <div>
+            <div class="eyebrow">Why Mage matters to a normal person</div>
+            <h2>A project map instead of a wall of text</h2>
+            <p><strong>Mage</strong> turns a structured project description into a clickable HTML board. It shows goals, system parts, workflows, dependencies, and connections. That helps answer simple questions: what are we building, how does it fit together, and where is work blocked?</p>
+            <p><strong>Knowledge OS</strong> is the schema and template system behind the map. You do not need to learn it first: the agent can help author a formation board, while Mage validates and exports the visual view.</p>
+            <div class="skill-list" aria-label="Additional skills"><code>mage</code><code>frontend-design</code><code>design-variants</code><code>component-stress</code><code>motion-review</code><code>scroll-craft</code><code>landing-page</code><code>howtos</code><code>consolidate-memory</code><code>clipify</code></div>
+          </div>
+          <div class="board-preview" aria-hidden="true">
+            <div class="board-node">Goal · desired outcome</div>
+            <div class="board-node">Workflow · path to outcome</div>
+            <div class="board-node">System · dependencies</div>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>Documents and browser</h2><p>Lite adds two simple but valuable tools for real work with files and the internet — no manual copying needed.</p></div>
+          <div class="feature-grid">
+            <article class="feature"><span class="feature-index">01 · PDF</span><h3>Read PDFs inside the project</h3><p>The agent can open PDFs from your folder, extract text, and work with it. No "first convert to txt" step.</p></article>
+            <article class="feature"><span class="feature-index">02 · PDF OUT</span><h3>PDF report generation</h3><p>Completed work can be wrapped into a structured PDF report. Useful for documentation you need to send to others.</p></article>
+            <article class="feature"><span class="feature-index">03 · BROWSER</span><h3>Headless Playwright</h3><p>The agent opens a page in your installed Chrome or Edge in isolated headless mode, performs actions, and checks the result. Your "QA assistant" that tests web pages for you.</p></article>
+            <article class="feature"><span class="feature-index">04 · SCREENSHOT</span><h3>Screenshots without a browser</h3><p>Lite can take a screenshot in headless mode and save to a file. For UI checks without manually opening anything.</p></article>
+            <article class="feature"><span class="feature-index">05 · FORM</span><h3>Form filling</h3><p>The agent can fill a complex web form for you — useful for testing internal tools or repeatable tasks.</p></article>
+            <article class="feature"><span class="feature-index">06 · COMPARE</span><h3>Visual verification</h3><p>Before-and-after snapshots — the agent compares and says whether the UI really looks like what you asked for.</p></article>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>MCP and external services</h2><p>MCP lets the agent connect extra tools — Notion, Reddit, OmniSearch, Lerim, Magic UI, etc. You decide which are active.</p></div>
+          <div class="mcp-panel">
+            <div class="panel-kicker">Connected by default</div>
+            <span class="status-pill">0 external MCP · all under your control</span>
+            <p>Lite supports user-configured <strong>stdio MCP</strong> and can read its own <code>mcp.json</code>, project-local <code>.jcode/mcp.json</code> or <code>.mcp.json</code>, plus compatible Codex CLI configs. You decide which keys to add.</p>
+            <div class="source-list" aria-label="Supported MCP sources"><code>Notion</code><code>Reddit</code><code>OmniSearch</code><code>Context7</code><code>Lerim memory</code><code>Pencil</code><code>Magic UI</code><code>Playwright</code></div>
+            <p class="release-note">Most MCP integrations work immediately. <strong>Reddit bundled</strong> is anonymous-first via public RSS — subreddit browsing works without setup. <strong>Free Reddit credentials</strong> unlock search, comments, user analysis, and higher limits. <strong>Notion, OmniSearch, Lerim memory</strong> need their own API keys. You add those keys in your own config — Lite never stores third-party credentials.</p>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>Original Jcode or Jcode Lite?</h2><p>Both run on the same runtime. Lite adds ready skills, memory, and research tooling — Original gives full freedom to build your own stack.</p></div>
+          <div class="comparison-wrap"><table class="comparison">
+            <thead><tr><th>Question</th><th><a href="https://github.com/1jehuang/jcode">Original Jcode</a></th><th>Jcode Lite</th></tr></thead>
+            <tbody>
+              <tr><td>Audience</td><td>Developers and power users who want full control.</td><td>Generalists and non-tech users who want a curated start + advanced skills.</td></tr>
+              <tr><td>AI provider</td><td>Broad login flows and provider profiles.</td><td>Stables bundled: MiniMax M3 as the main brain, MiniMax M2.7 Highspeed for fast work. You can connect your own provider.</td></tr>
+              <tr><td>Scope</td><td>Full runtime with broader optional features.</td><td>Release-LTO runtime without Bedrock features, but with PDF, headless Playwright, Mage, KOS.</td></tr>
+              <tr><td>Memory</td><td>Local embeddings and memory sidecar available.</td><td>Memory embeddings + memory sidecar bundled and on by default.</td></tr>
+              <tr><td>Mage / Knowledge OS</td><td>Depends on your setup.</td><td>Skill, templates, schema, and portable renderer already bundled.</td></tr>
+              <tr><td>Skills</td><td>Flexible user/project skill setup.</td><td>19 business roles + 6 workflow wrappers + utility skills bundled.</td></tr>
+              <tr><td>Research</td><td>Tooling must be connected.</td><td>AgentGrep, OmniSearch, Context7, Reddit — bundled and ready.</td></tr>
+              <tr><td>Browser work</td><td>Needs separate setup.</td><td>Headless Playwright built in, works immediately.</td></tr>
+              <tr><td>PDF</td><td>Reader/writer not in release build.</td><td>PDF reader and writer enabled.</td></tr>
+              <tr><td>MCP</td><td>Configurable stdio MCP support.</td><td>Same support, with optional service keys by your choice.</td></tr>
+              <tr><td>Platforms</td><td>Linux, macOS, and Windows.</td><td>Universal macOS and Windows x64.</td></tr>
+              <tr><td>Updates</td><td>Official upstream update path.</td><td>Versioned package updates with config preservation and rollback.</td></tr>
+            </tbody>
+          </table></div>
+        </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>Honest trade-offs</h2><p>Lite delivers more out of the box, but the install is heavier than Lite Free. That is not an advantage for everyone.</p></div>
+          <div class="tradeoff-grid">
+            <article class="tradeoff"><h3>Choose Lite when</h3><ul><li>You want Stables bundled with no provider setup.</li><li>You want 19 business roles and 6 workflow wrappers ready.</li><li>Memory with embeddings and sidecar should work immediately.</li><li>Mage, Knowledge OS, headless Playwright, and PDF out of the box.</li></ul></article>
+            <article class="tradeoff"><h3>Choose Lite Free or Original when</h3><ul><li>You want your own provider — pick Lite Free.</li><li>You need Linux or full-feature build — pick Original Jcode.</li><li>You do not want the extra install size — Lite Free is noticeably lighter.</li></ul></article>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>Honest cons</h2><p>These are things to know before installing. We do not hide that Lite is more than Lite Free.</p></div>
+          <div class="cons-panel">
+            <ul>
+              <li><strong>Larger install size.</strong> Lite bundles Stables routing, 19 skills, memory embeddings, Mage, Knowledge OS, PDF, and Playwright. The downloaded archive is noticeably bigger than Lite Free.</li>
+              <li><strong>Node.js 20 or newer required</strong> for Mage and Knowledge OS.</li>
+              <li><strong>A system browser is required.</strong> Headless Playwright uses your installed Chrome or Edge in isolated headless mode. Lite does not ship its own browser — you need a stable local browser.</li>
+              <li><strong>Optional MCP service keys.</strong> <strong>Reddit bundled</strong> is anonymous-first — works without setup for subreddit browsing via public RSS. <strong>Free Reddit credentials</strong> are an optional unlock for search, comments, user analysis, and higher limits. <strong>Notion, OmniSearch, Lerim memory</strong> need their own API keys for full functionality.</li>
+              <li><strong>Stables bundled means higher opacity threshold.</strong> If you do not want anyone else paying for your AI — pick Lite Free.</li>
+            </ul>
+          </div>
+        </section>
+      </section>
+
+      <section data-tab-panel="howto" hidden>
+        <section>
+          <div class="section-heading"><h2>Three steps to your first task</h2><p>After install Lite is ready immediately — no extra provider setup, because Stables is already bundled.</p></div>
+          <div class="steps">
+            <article class="step"><h3>Download</h3><p>Package for macOS on Apple Silicon, or a 64-bit package for Windows 10+.</p></article>
+            <article class="step"><h3>Run the installer</h3><p><code>jcode-lite.command</code> on macOS or <code>install.cmd</code> on Windows. The installer places everything in an isolated folder.</p></article>
+            <article class="step"><h3>First task</h3><p>Open Terminal in the folder you want and enter <code>jcodel</code>. Describe the task in ordinary language — the agent is ready.</p></article>
+          </div>
+          <div class="download-grid">
+            <article class="card"><h2>macOS</h2><p>Apple Silicon (M1 and newer). Requires Node.js 20+.</p><a class="button" href="/jcode-lite/macos/jcode-lite-macos-latest.zip">Download macOS</a></article>
+            <article class="card"><h2>Windows</h2><p>64-bit Windows 10 or newer. Requires Node.js 20+.</p><a class="button" href="/jcode-lite/windows/jcode-lite-windows-latest.zip">Download Windows</a></article>
+          </div>
+          <p class="release-note">Stables bundled. No extra provider setup, API key, OAuth token, or default model needed.</p>
+        </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>Stables routing in Lite</h2><p>Lite uses our Stables routing. The main brain is MiniMax M3, with fast mechanical work delegated to MiniMax M2.7 Highspeed. These are defaults, not limits: you can connect your own provider and pick any model.</p></div>
+          <div class="routing-panel">
+            <div class="panel-kicker">Model routing</div>
+            <div class="terminal-line"><strong>main</strong><span>MiniMax M3 <code>minimax/M3</code> through Stables (main brain for all tasks)</span></div>
+            <div class="terminal-line"><strong>scout</strong><span>MiniMax M3 <code>minimax/M3</code> via Stables (code search, file reading, research)</span></div>
+            <div class="terminal-line"><strong>speed</strong><span>MiniMax M2.7 Highspeed <code>minimax/M2.7-highspeed</code> via Stables (fast mechanical tasks)</span></div>
+            <div class="terminal-line"><strong>volume</strong><span>MiniMax M3 <code>minimax/M3</code> via Stables (large routine operations)</span></div>
+            <p>All of this works "out of the box" — the user does not see the routing complexity but gets the right model for the right task.</p>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>Want Lite Free?</h2><p>If you need your own provider or do not want Stables — pick Lite Free. The same experience, but you connect the provider yourself.</p></div>
+          <p><a class="button button-secondary" href="#lite-free" data-jump-edition="free">Jump to Lite Free</a></p>
+        </section>
+      </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>If something goes wrong</h2><p>The most common situations and what to do. The same list ships as <code>START-HERE.md</code> inside the archive.</p></div>
+          <div class="routing-panel">
+            <div class="terminal-line"><strong>"requires Node.js 20 or newer"</strong><span>Install the LTS version from <a href="https://nodejs.org">nodejs.org</a>, then close and reopen your terminal.</span></div>
+            <div class="terminal-line"><strong>macOS: "unidentified developer"</strong><span>Right-click the file → <strong>Open</strong> → <strong>Open</strong> again. Once only.</span></div>
+            <div class="terminal-line"><strong>Windows: blue SmartScreen warning</strong><span>Click <strong>More info</strong>, then <strong>Run anyway</strong>.</span></div>
+            <div class="terminal-line"><strong>The window opens and closes instantly</strong><span>Open a terminal first, drag <code>jcode-lite</code> into it and press Enter, so the error stays on screen.</span></div>
+            <div class="terminal-line"><strong>"Stables access is not configured"</strong><span>Run <code>setup-key.command</code> (macOS) or <code>setup-key.ps1</code> (Windows) and paste the key you were given.</span></div>
+            <div class="terminal-line"><strong>"Rate limited" / usage limit reached</strong><span>Lite offers to switch to another available model after a 3-second countdown (Esc to stay). Or type <code>/model</code>.</span></div>
+            <div class="terminal-line"><strong>It answers, but poorly</strong><span>Give it more context: name the file or folder, paste the exact error text, and say what you expected instead.</span></div>
+          </div>
+          <p class="release-note">Still stuck? Email <a href="mailto:daniil.kovaliov@gmail.com">daniil.kovaliov@gmail.com</a> with what you did, what you expected, and the exact message (a screenshot is fine).</p>
+        </section>
+
+      <footer>Jcode Lite · vNext · Built on <a href="https://github.com/1jehuang/jcode">open-source Jcode</a> · LeGrin public beta</footer>
+    </div>
+
+    <!-- ===================== EN · Lite Free ===================== -->
+    <div data-edition="free" data-language="en" hidden>
+      <div class="tabs" role="tablist" aria-label="Tabs">
+        <button type="button" role="tab" data-tab="overview" aria-selected="true">Overview</button>
+        <button type="button" role="tab" data-tab="features" aria-selected="false">Features</button>
+        <button type="button" role="tab" data-tab="howto" aria-selected="false">How to Use</button>
+      </div>
+
+      <section data-tab-panel="overview">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <div class="eyebrow">Jcode Lite Free · vNext · 0.2.0-beta.1</div>
+            <h1>An AI teammate, without bundled AI.</h1>
+            <p class="intro">The same Jcode environment as Lite, but without Stables. You connect your own provider and use the same experience. Foundation — <a href="https://github.com/1jehuang/jcode">original Jcode</a>, open source under MIT.</p>
+            <div class="hero-actions">
+              <a class="button" href="/jcode-lite-free/macos/jcode-lite-free-macos-latest.zip">Download for macOS</a>
+              <a class="button button-secondary" href="/jcode-lite-free/windows/jcode-lite-free-windows-latest.zip">Download for Windows</a>
+            </div>
+          </div>
+          <aside class="hero-panel" aria-label="Product summary"><div class="panel-kicker">In short</div><div class="terminal-line"><strong>what</strong><span>AI agent for files and projects</span></div><div class="terminal-line"><strong>how</strong><span>runs in the folder you choose</span></div><div class="terminal-line"><strong>AI</strong><span>you connect your own provider</span></div><div class="terminal-line"><strong>command</strong><span><code>jcodef</code> from any folder</span></div></aside>
+        </div>
+
+        <section class="section">
+          <div class="section-heading"><h2>Honest about Lite Free</h2><p>Lite Free is Lite without Stables. The same runtime, the same skills, the same Mage and Knowledge OS. The only difference: no bundled AI, so you connect your own provider.</p></div>
+          <div class="cons-panel">
+            <ul>
+              <li><strong>No bundled AI.</strong> After install you will run through provider onboarding — choose your account, enter your key or OAuth.</li>
+              <li><strong>Provider setup required before your first task.</strong> Lite Free will not start any command until a provider is configured.</li>
+              <li><strong>No restrictions on provider.</strong> Lite Free supports the same providers as Original Jcode — your choice.</li>
+            </ul>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>What Lite Free shares with Lite</h2><p>Everything except Stables. Sage principles, Mage, Knowledge OS, PDF, headless Playwright, 19 business roles — all of this works just like in Lite. You just add your provider instead of bundled.</p></div>
+          <div class="feature-grid">
+            <article class="feature"><span class="feature-index">01 · SAGE</span><h3>Same principles</h3><p>5× less permanent instruction, evidence-based verification, reversible changes. All of it is also in Lite Free.</p></article>
+            <article class="feature"><span class="feature-index">02 · ROLES</span><h3>19 business roles + 6 wrappers</h3><p>CFO, Client, Skeptic, Taleb and the other roles work. Wrappers like synthesis, decision-board, idea-forge too.</p></article>
+            <article class="feature"><span class="feature-index">03 · MEMORY</span><h3>Memory embeddings + sidecar</h3><p>The same memory tools. You just connect a provider that supports them.</p></article>
+            <article class="feature"><span class="feature-index">04 · MAGE</span><h3>Mage + Knowledge OS</h3><p>Skill, templates, schema, and portable renderer — bundled the same way. Project map available immediately.</p></article>
+            <article class="feature"><span class="feature-index">05 · PDF</span><h3>PDF and Playwright</h3><p>PDF reader/writer and headless Playwright work the same — just run Lite Free with your provider.</p></article>
+            <article class="feature"><span class="feature-index">06 · WORKFLOW</span><h3>Same dev workflow</h3><p>TDD, verify, revert, decide, delegate, commit — all of this works identically in Lite Free.</p></article>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>Original Jcode or Jcode Lite Free?</h2><p>Lite Free is Lite without bundled AI. Original Jcode is Lite Free without our curated skills. Pick by your freedom level.</p></div>
+          <div class="comparison-wrap"><table class="comparison">
+            <thead><tr><th>Question</th><th><a href="https://github.com/1jehuang/jcode">Original Jcode</a></th><th>Jcode Lite Free</th><th>Jcode Lite</th></tr></thead>
+            <tbody>
+              <tr><td>AI provider</td><td>Any supported provider.</td><td>Any supported provider, you connect it yourself.</td><td>Stables bundled, no choice needed.</td></tr>
+              <tr><td>Skills</td><td>Flexible personal setup.</td><td>19 roles + 6 wrappers bundled.</td><td>19 roles + 6 wrappers bundled.</td></tr>
+              <tr><td>Memory</td><td>Depends on setup.</td><td>Memory embeddings + sidecar available.</td><td>Memory embeddings + sidecar on.</td></tr>
+              <tr><td>Mage / KOS</td><td>Depends on setup.</td><td>Bundled.</td><td>Bundled.</td></tr>
+              <tr><td>PDF / Playwright</td><td>Depends on build.</td><td>Enabled.</td><td>Enabled.</td></tr>
+              <tr><td>Size</td><td>Base.</td><td>Medium — no Stables, but with skills.</td><td>Largest — Stables bundled.</td></tr>
+              <tr><td>Platforms</td><td>Linux, macOS, Windows.</td><td>macOS universal, Windows x64.</td><td>macOS universal, Windows x64.</td></tr>
+            </tbody>
+          </table></div>
+        </section>
+      </section>
+
+      <section data-tab-panel="features" hidden>
+        <section>
+          <div class="section-heading"><h2>Same capabilities, your provider</h2><p>Lite Free bundles everything Lite does, except Stables. You run provider onboarding once — then you work without restrictions.</p></div>
+          <div class="feature-grid">
+            <article class="feature"><span class="feature-index">01 · SCOUTS</span><h3>AgentGrep · OmniSearch · Context7 · Reddit</h3><p>The same four scouts. They work identically because they do not depend on a specific provider.</p></article>
+            <article class="feature"><span class="feature-index">02 · MEMORY</span><h3>Memory embeddings + sidecar</h3><p>The same memory tools. Some providers have their own embeddings — the agent adapts.</p></article>
+            <article class="feature"><span class="feature-index">03 · SKILLS</span><h3>19 roles + 6 wrappers</h3><p>CFO, Client, Competitor, Skeptic, Taleb and the rest — bundled. Wrappers synthesis, decision-board, idea-forge and others.</p></article>
+            <article class="feature"><span class="feature-index">04 · MAGE</span><h3>Mage + Knowledge OS</h3><p>Project map instead of wall of text. Skill, templates, schema, portable renderer — all bundled.</p></article>
+            <article class="feature"><span class="feature-index">05 · PDF</span><h3>PDF reader and writer</h3><p>Works immediately after install. Does not depend on a provider.</p></article>
+            <article class="feature"><span class="feature-index">06 · PLAYWRIGHT</span><h3>Headless Playwright</h3><p>Runs your Chrome or Edge in isolated headless mode, takes screenshots, fills forms. Works the same in Lite Free.</p></article>
+          </div>
+        </section>
+      </section>
+
+      <section data-tab-panel="howto" hidden>
+        <section>
+          <div class="section-heading"><h2>Three steps to your first task</h2><p>The main difference with Lite — you run provider onboarding yourself. A few minutes, and the only required setup.</p></div>
+          <div class="steps">
+            <article class="step"><h3>Download</h3><p>Package for macOS on Apple Silicon, or a 64-bit package for Windows 10+.</p></article>
+            <article class="step"><h3>Run the installer</h3><p><code>jcode-free.command</code> on macOS or <code>install.cmd</code> on Windows.</p></article>
+            <article class="step"><h3>Connect AI</h3><p>Run provider onboarding — pick your service, enter your key or OAuth. After that <code>jcodef</code> is ready.</p></article>
+          </div>
+          <div class="download-grid">
+            <article class="card"><h2>macOS</h2><p>Apple Silicon (M1 and newer). Requires Node.js 20+.</p><a class="button" href="/jcode-lite-free/macos/jcode-lite-free-macos-latest.zip">Download macOS</a></article>
+            <article class="card"><h2>Windows</h2><p>64-bit Windows 10 or newer. Requires Node.js 20+ for Mage.</p><a class="button" href="/jcode-lite-free/windows/jcode-lite-free-windows-latest.zip">Download Windows</a></article>
+          </div>
+          <p class="release-note">Provider usage and cost depend on your account. Lite Free does not store your keys — they live in your config.</p>
+        </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>Want Lite?</h2><p>If you want AI in the box — pick Lite. Same experience, but Stables bundled.</p></div>
+          <p><a class="button button-secondary" href="#lite" data-jump-edition="lite">Jump to Lite</a></p>
+        </section>
+      </section>
+
+        <section class="section">
+          <div class="section-heading"><h2>If something goes wrong</h2><p>The most common situations and what to do. The same list ships as <code>START-HERE.md</code> inside the archive.</p></div>
+          <div class="routing-panel">
+            <div class="terminal-line"><strong>"requires Node.js 20 or newer"</strong><span>Install the LTS version from <a href="https://nodejs.org">nodejs.org</a>, then close and reopen your terminal.</span></div>
+            <div class="terminal-line"><strong>macOS: "unidentified developer"</strong><span>Right-click the file → <strong>Open</strong> → <strong>Open</strong> again. Once only.</span></div>
+            <div class="terminal-line"><strong>Windows: blue SmartScreen warning</strong><span>Click <strong>More info</strong>, then <strong>Run anyway</strong>.</span></div>
+            <div class="terminal-line"><strong>The window opens and closes instantly</strong><span>Open a terminal first, drag <code>jcode-free</code> into it and press Enter, so the error stays on screen.</span></div>
+            <div class="terminal-line"><strong>"No provider configured"</strong><span>You have not connected an account yet, or the login expired. Type <code>/login</code> and pick your provider.</span></div>
+            <div class="terminal-line"><strong>"Invalid API key"</strong><span>The key was mistyped, revoked, or expired. Run <code>/login</code> again.</span></div>
+            <div class="terminal-line"><strong>"Rate limited" / usage limit reached</strong><span>Your own account is out of capacity. Wait for it to reset, or type <code>/model</code> and switch to another provider you have connected.</span></div>
+            <div class="terminal-line"><strong>It answers, but poorly</strong><span>Give it more context: name the file or folder, paste the exact error text, and say what you expected instead.</span></div>
+          </div>
+          <p class="release-note">Still stuck? Email <a href="mailto:daniil.kovaliov@gmail.com">daniil.kovaliov@gmail.com</a> with what you did, what you expected, and the exact message (a screenshot is fine).</p>
+        </section>
+
+      <footer>Jcode Lite Free · vNext · Built on <a href="https://github.com/1jehuang/jcode">open-source Jcode</a> · LeGrin public beta</footer>
+    </div>
+
+  </main>
+  <script>
+    (function () {
+      const editionButtons = document.querySelectorAll('[data-edition-button]');
+      const languageButtons = document.querySelectorAll('[data-language-button]');
+      const editionViews = document.querySelectorAll('[data-edition]');
+      const languageViews = document.querySelectorAll('[data-language]');
+      const jumpButtons = document.querySelectorAll('[data-jump-edition]');
+
+      function setEdition(edition) {
+        editionViews.forEach((view) => { view.hidden = view.dataset.edition !== edition; });
+        editionButtons.forEach((button) => { button.setAttribute('aria-pressed', String(button.dataset.editionButton === edition)); });
+        const params = new URLSearchParams(window.location.search);
+        params.set('edition', edition);
+        history.replaceState(null, '', window.location.pathname + '?' + params.toString() + window.location.hash);
+      }
+
+      function setLanguage(language) {
+        document.documentElement.lang = language;
+        // Among visible-by-edition views, show only the matching language
+        editionViews.forEach((view) => {
+          if (!view.hidden) {
+            const matches = view.dataset.language === language;
+            view.hidden = !matches;
+          }
+        });
+        languageButtons.forEach((button) => { button.setAttribute('aria-pressed', String(button.dataset.languageButton === language)); });
+        const params = new URLSearchParams(window.location.search);
+        params.set('lang', language);
+        history.replaceState(null, '', window.location.pathname + '?' + params.toString() + window.location.hash);
+      }
+
+      // Tabs: scoped per edition+language view
+      document.querySelectorAll('[data-tab]').forEach((tab) => {
+        tab.addEventListener('click', () => {
+          const target = tab.dataset.tab;
+          const view = tab.closest('[data-edition]');
+          if (!view) return;
+          view.querySelectorAll('[data-tab]').forEach((t) => { t.setAttribute('aria-selected', String(t.dataset.tab === target)); });
+          view.querySelectorAll('[data-tab-panel]').forEach((p) => { p.hidden = p.dataset.tabPanel !== target; });
+        });
+      });
+
+      editionButtons.forEach((button) => button.addEventListener('click', () => setEdition(button.dataset.editionButton)));
+      languageButtons.forEach((button) => button.addEventListener('click', () => setLanguage(button.dataset.languageButton)));
+      jumpButtons.forEach((button) => button.addEventListener('click', (event) => {
+        event.preventDefault();
+        setEdition(button.dataset.jumpEdition);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }));
+
+      // Initial state from query
+      const params = new URLSearchParams(window.location.search);
+      const initialEdition = params.get('edition') === 'free' ? 'free' : 'lite';
+      const initialLanguage = params.get('lang') === 'en' ? 'en' : 'uk';
+      setEdition(initialEdition);
+      setLanguage(initialLanguage);
+    })();
+  </script>
+</body>
+</html>

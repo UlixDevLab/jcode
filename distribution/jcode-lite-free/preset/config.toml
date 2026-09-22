@@ -1,0 +1,15 @@
+# Free is provider-neutral: no [provider] section at all. No default provider,
+# no default model, and no routing/failover override — Free uses stock jcode
+# behaviour so the user's own providers work exactly as they do in upstream
+# jcode. Standard Jcode provider onboarding runs on first launch.
+#
+# What Free ships is workflows, preinstalled MCPs, skills, agents, and
+# provider-agnostic guardrails. Nothing here steers models or providers.
+
+[agents]
+# Free ships NO pinned route fields (no swarm_model, no memory_model). The
+# user picks both after install. Only universal runtime flags are set:
+# memory sidecar stays on (it auto-selects a backend per active provider)
+# and embeddings stay local so the package ships without remote API calls.
+memory_sidecar_enabled = true
+memory_embedding_backend = "local"

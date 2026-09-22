@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "stream_epoch": 1,
+  "revision": 0,
+  "payload": {
+    "application": {
+      "version": "v0.0.0-demo (0000000)",
+      "account_label": "demo@jcode.dev"
+    },
+    "session": {
+      "display_title": "Demo chat",
+      "repository_root": "/home/j/jcode",
+      "model": {
+        "label": "Sonnet"
+      }
+    },
+    "connection": "connected",
+    "messages": []
+  }
+}

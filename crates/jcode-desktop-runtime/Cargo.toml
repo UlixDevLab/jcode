@@ -1,0 +1,10 @@
+[package]
+name = "jcode-desktop-runtime"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "Framework-neutral SDK runtime for Jcode desktop clients"
+
+[dependencies]
+jcode-desktop-core = { path = "../jcode-desktop-core" }
+jcode-sdk = { path = "../jcode-sdk" }

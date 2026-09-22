@@ -1,0 +1,77 @@
+name: Lite Free native Windows
+on:
+  workflow_dispatch:
+env:
+  JCODE_NO_TELEMETRY: '1'
+permissions:
+  contents: read
+concurrency:
+  group: lite-free-windows-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: lite-free-windows
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.17.0'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Build native Windows runtime
+        shell: pwsh
+        run: |
+          cargo build --profile release-lto --locked --no-default-features --features pdf,embeddings --bin jcode
+          if ($LASTEXITCODE -ne 0) { throw 'Native build failed' }
+          & target/release-lto/jcode.exe --no-update version --json
+          if ($LASTEXITCODE -ne 0) { throw 'Native runtime did not launch' }
+      - name: Assemble and verify credential-free archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          distribution/jcode-lite-free/build.sh --platform windows --binary "$PWD/target/release-lto/jcode.exe" --output "$PWD/artifacts/JcodeLiteFree-windows-x64-0.3.0-beta.1.zip"
+          python distribution/jcode-lite-free/support/bundle-windows-artifact.py artifacts/JcodeLiteFree-windows-x64-0.3.0-beta.1.zip
+          python distribution/jcode-lite-free/tests/verify-package.py artifacts/JcodeLiteFree-windows-x64-0.3.0-beta.1.zip
+      - name: Actual isolated Windows install and reinstall
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $case = Join-Path $env:RUNNER_TEMP 'free-acceptance'
+          $package = Join-Path $case 'package'
+          New-Item -ItemType Directory -Force $case | Out-Null
+          Expand-Archive artifacts/JcodeLiteFree-windows-x64-0.3.0-beta.1.zip $package
+          $env:LOCALAPPDATA = Join-Path $case 'local'
+          $env:USERPROFILE = Join-Path $case 'home'
+          $env:HOME = $env:USERPROFILE
+          New-Item -ItemType Directory -Force $env:USERPROFILE | Out-Null
+          $env:JCODE_LITE_FREE_ALLOW_NONINTERACTIVE = '1'
+          $env:JCODE_LITE_FREE_INSTALL_NO_LAUNCH = '1'
+          $env:JCODE_LITE_FREE_INSTALL_NO_PATH_UPDATE = '1'
+          $env:JCODE_LITE_FREE_NO_PAUSE = '1'
+          $env:JCODE_LITE_FREE_UPDATE_CHECK = '0'
+          & "$package/install.ps1"
+          if ($LASTEXITCODE -ne 0) { throw 'First install failed' }
+          $root = Join-Path $env:LOCALAPPDATA 'LeGrin/JcodeLiteFree'
+          $home = Join-Path $root 'home'
+          New-Item -ItemType Directory -Force (Join-Path $home 'sessions') | Out-Null
+          Set-Content (Join-Path $home 'sessions/acceptance.txt') 'keep-me'
+          & "$package/install.ps1"
+          if ($LASTEXITCODE -ne 0) { throw 'Reinstall failed' }
+          if ((Get-Content (Join-Path $home 'sessions/acceptance.txt')).Trim() -ne 'keep-me') { throw 'Session lost' }
+          if (!(Test-Path (Join-Path $home 'roles/implement.md'))) { throw 'Roles missing' }
+          & (Join-Path $root 'bin/jcodef.ps1') version --json
+          if ($LASTEXITCODE -ne 0) { throw 'Installed launcher failed' }
+          if (Test-Path (Join-Path $env:USERPROFILE '.jcode')) { throw 'Ordinary home contaminated' }
+          Get-FileHash artifacts/JcodeLiteFree-windows-x64-0.3.0-beta.1.zip -Algorithm SHA256 | Format-List
+      - uses: actions/upload-artifact@v4
+        with:
+          name: JcodeLiteFree-windows-x64
+          path: artifacts/*.zip
+          retention-days: 14

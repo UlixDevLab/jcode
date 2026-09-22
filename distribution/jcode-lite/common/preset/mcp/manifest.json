@@ -1,0 +1,86 @@
+{
+  "schema_version": "jcode-lite-mcp-manifest/v1",
+  "product": "jcode-lite",
+  "minimum_node_major": 20,
+  "install_command": "npm ci --omit=dev --ignore-scripts --no-audit --no-fund",
+  "vendored_root": ".",
+  "shared_with_free": true,
+  "merge_into_user_mcp_json": {
+    "policy": "idempotent-template-merge",
+    "preserve_user_added_servers": true,
+    "preserve_user_env_keys": true,
+    "never_overwrite_existing_server": true,
+    "do_not_embed_api_keys": true
+  },
+  "servers": [
+    {
+      "name": "playwright",
+      "package": "@playwright/mcp@0.0.79",
+      "wrapper": "bin/playwright",
+      "license": "Apache-2.0",
+      "stdio_only": true,
+      "browser_download_forbidden": true,
+      "requires_system_browser": "chrome-or-edge",
+      "browser_check_command": {
+        "macos": "for c in \"/Applications/Google Chrome.app\" \"/Applications/Microsoft Edge.app\"; do [ -e \"$c\" ] && { echo \"$c\"; exit 0; }; done; exit 1",
+        "windows": "powershell -NoProfile -Command \"Get-Item 'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\msedge.exe','HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\chrome.exe' -ErrorAction SilentlyContinue | Select-Object -First 1\""
+      },
+      "required_flags": ["--headless", "--isolated"],
+      "env_keys_required": [],
+      "env_keys_optional": []
+    },
+    {
+      "name": "context7",
+      "package": "@upstash/context7-mcp@4.0.2",
+      "wrapper": "bin/context7",
+      "license": "MIT",
+      "stdio_only": true,
+      "env_keys_required": [],
+      "env_keys_optional": ["CONTEXT7_API_KEY"],
+      "free_tier_key_supported": true
+    },
+    {
+      "name": "omnisearch",
+      "package": "mcp-omnisearch@0.0.28",
+      "wrapper": "bin/omnisearch",
+      "license": "MIT",
+      "stdio_only": true,
+      "env_keys_required": [],
+      "env_keys_optional": ["OMNISEARCH_API_KEY"],
+      "free_tier_key_supported": true
+    },
+    {
+      "name": "reddit",
+      "package": "reddit-mcp-buddy@1.1.14",
+      "wrapper": "bin/reddit",
+      "license": "MIT",
+      "stdio_only": true,
+      "auth_modes": {
+        "anonymous": {
+          "default": true,
+          "capabilities": ["subreddit_browsing_via_public_rss"],
+          "limitations": [
+            "no subreddit search",
+            "no comment threads",
+            "no user analysis",
+            "no private or quarantined subreddits"
+          ],
+          "env_keys_required": []
+        },
+        "authenticated": {
+          "default": false,
+          "capabilities": [
+            "subreddit_search",
+            "comment_threads",
+            "user_analysis",
+            "private_or_quarantined_subreddits_when_authorized"
+          ],
+          "env_keys_required": ["REDDIT_CLIENT_ID", "REDDIT_CLIENT_SECRET"],
+          "user_supplied_only": true,
+          "embedded_credentials_forbidden": true
+        }
+      },
+      "site_copy_note": "Site copy must honestly describe anonymous limitations and the optional credentials that unlock the full surface."
+    }
+  ]
+}

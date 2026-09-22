@@ -1,0 +1,40 @@
+#!/usr/bin/env node
+// OmniSearch MCP wrapper. Vendored via `npm ci --omit=dev` from package.json.
+// The user may set OMNISEARCH_API_KEY to unlock paid providers; the package
+// ships with no embedded key, and update/rollback flows preserve any
+// user-supplied value.
+"use strict";
+
+const path = require("path");
+const { spawn } = require("child_process");
+const fs = require("fs");
+
+const here = __dirname;
+const root = path.resolve(here, "..");
+const pkg = "mcp-omnisearch";
+const candidates = [
+  path.join(root, "node_modules", pkg, "dist", "index.js"),
+  path.join(root, "node_modules", ".bin", "mcp-omnisearch"),
+];
+
+let entry = null;
+for (const candidate of candidates) {
+  if (fs.existsSync(candidate)) {
+    entry = candidate;
+    break;
+  }
+}
+if (!entry) {
+  process.stderr.write(
+    "Vendored mcp-omnisearch not found. Run `npm ci --omit=dev` from the MCP vendor root before packaging.\n"
+  );
+  process.exit(2);
+}
+
+const child = spawn(process.execPath, [entry, ...process.argv.slice(2)], {
+  stdio: "inherit",
+});
+child.on("exit", (code, signal) => {
+  if (signal) process.kill(process.pid, signal);
+  process.exit(code ?? 1);
+});

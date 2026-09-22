@@ -1,0 +1,12 @@
+{
+  "upstream_tag": "v0.86.0",
+  "upstream_commit": "e589cbe5aaa57ea2203fd5c7f7eb37bbeb2006fc",
+  "integration_commit": "71f5a6c0fba1aba48609166c93bcf0a982c02986",
+  "exported_file_count": 2117,
+  "scope": "runtime and credential-free edition only, no local history or private edition assets",
+  "public_export_adjustments": [
+    "Native Windows packaging and CI",
+    "Verifier vendor-license correction",
+    "Removed upstream Google OAuth application identifiers and secrets. Existing recipient environment overrides remain, with explicit configuration error before login or refresh. No GitHub push-protection bypass."
+  ]
+}

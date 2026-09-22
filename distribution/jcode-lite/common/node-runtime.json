@@ -1,0 +1,13 @@
+{
+  "schema_version": "jcode-lite-node-runtime/v1",
+  "runtime": "node",
+  "version": "22.17.0",
+  "minimum_major": 20,
+  "platform": "darwin-arm64",
+  "archive": {
+    "url": "https://nodejs.org/dist/v22.17.0/node-v22.17.0-darwin-arm64.tar.gz",
+    "sha256": "615dda58b5fb41fad2be43940b6398ca56554cbe05800953afadc724729cb09e"
+  },
+  "package_path": "runtime/node",
+  "source": "https://nodejs.org/dist/v22.17.0/SHASUMS256.txt"
+}

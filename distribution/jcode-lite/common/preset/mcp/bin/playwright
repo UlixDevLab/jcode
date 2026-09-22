@@ -1,0 +1,133 @@
+#!/usr/bin/env node
+// Playwright MCP wrapper. Detects system Chrome/Edge and refuses to fall back
+// to runtime browser downloads. Always invokes the vendored MCP with
+// --headless and --isolated so the package never writes a browser cache.
+//
+// Usage: node bin/playwright
+//
+// The verifier rejects any wrapper that does not pass --headless and
+// --isolated. The build script enforces the same invariants at archive time.
+
+"use strict";
+
+const fs = require("fs");
+const path = require("path");
+const { spawn } = require("child_process");
+
+const here = __dirname;
+const root = path.resolve(here, "..");
+const pkg = "@playwright/mcp";
+const pkgDir = path.join(root, "node_modules", pkg);
+const pkgJson = path.join(pkgDir, "package.json");
+
+function detectBrowser() {
+  const platform = process.platform;
+  if (platform === "darwin") {
+    const candidates = [
+      "/Applications/Google Chrome.app",
+      "/Applications/Microsoft Edge.app",
+      "/Applications/Google Chrome Canary.app",
+    ];
+    for (const candidate of candidates) {
+      try {
+        if (fs.existsSync(candidate)) return candidate;
+      } catch (_) {}
+    }
+    return null;
+  }
+  if (platform === "win32") {
+    // Use 'where' as a coarse fallback; the install flow also probes the
+    // App Paths registry entries declared in the MCP manifest.
+    const names = ["msedge.exe", "chrome.exe"];
+    for (const name of names) {
+      try {
+        const out = require("child_process")
+          .execFileSync("where", [name], { stdio: ["ignore", "pipe", "ignore"] })
+          .toString()
+          .trim();
+        if (out) return name;
+      } catch (_) {}
+    }
+    return null;
+  }
+  return null;
+}
+
+function failActionable() {
+  const hint =
+    process.platform === "darwin"
+      ? "Install Google Chrome or Microsoft Edge to /Applications and retry."
+      : process.platform === "win32"
+        ? "Install Google Chrome or Microsoft Edge, then retry."
+        : "Install Google Chrome or Microsoft Edge and ensure it is on PATH.";
+  process.stderr.write(
+    "playwright MCP requires a system Chrome or Edge browser. " + hint + "\n"
+  );
+  process.stderr.write(
+    "Jcode Lite refuses to download a browser at runtime; the package stays deterministic.\n"
+  );
+  process.exit(2);
+}
+
+// Robust entry resolution. The pinned @playwright/mcp 0.0.79 ships cli.js at
+// the package root and exposes bin { "playwright-mcp": "cli.js" } in
+// package.json. Older versions used dist/cli.js. We prefer the pinned
+// package.json's bin field, then fall back to common layouts, then the
+// npm-installed .bin shim.
+function resolveEntry() {
+  if (!fs.existsSync(pkgJson)) return null;
+  let manifest = null;
+  try {
+    manifest = JSON.parse(fs.readFileSync(pkgJson, "utf8"));
+  } catch (_) {
+    manifest = null;
+  }
+  const candidates = [];
+  if (manifest && manifest.bin) {
+    if (typeof manifest.bin === "string") {
+      candidates.push(path.join(pkgDir, manifest.bin));
+    } else if (typeof manifest.bin === "object") {
+      for (const target of Object.values(manifest.bin)) {
+        if (typeof target === "string") {
+          candidates.push(path.join(pkgDir, target));
+        }
+      }
+    }
+  }
+  // Layout fallbacks for past and future versions of @playwright/mcp.
+  candidates.push(
+    path.join(pkgDir, "cli.js"),
+    path.join(pkgDir, "dist", "cli.js"),
+    path.join(pkgDir, "index.js"),
+    path.join(root, "node_modules", ".bin", "playwright-mcp")
+  );
+  for (const candidate of candidates) {
+    if (candidate && fs.existsSync(candidate)) return candidate;
+  }
+  return null;
+}
+
+const browser = detectBrowser();
+if (!browser) failActionable();
+
+// Enforce deterministic flags. Refuse to start without them.
+const required = ["--headless", "--isolated"];
+for (const flag of required) {
+  if (!process.argv.includes(flag)) process.argv.push(flag);
+}
+
+const vendoredCli = resolveEntry();
+if (!vendoredCli) {
+  process.stderr.write(
+    "Vendored @playwright/mcp not found. Run `npm ci --omit=dev` from the MCP vendor root before packaging.\n"
+  );
+  process.exit(2);
+}
+
+const child = spawn(process.execPath, [vendoredCli, ...process.argv.slice(2)], {
+  stdio: "inherit",
+});
+child.on("exit", (code, signal) => {
+  if (signal) process.kill(process.pid, signal);
+  process.exit(code ?? 1);
+});

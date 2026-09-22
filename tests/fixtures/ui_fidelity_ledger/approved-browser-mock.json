@@ -1,0 +1,20 @@
+{
+  "artifact": {
+    "kind": "browser-mock",
+    "hash": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "escape_hatches": [
+    {"kind": "warn-only-lint", "reason": "legacy token migration"},
+    {"kind": "review-band-drift", "reason": "font rasterization review"},
+    {"kind": "migrate-budget", "reason": "bounded legacy uplift"}
+  ],
+  "fidelity_ledger": {
+    "elements": [
+      {"id": "E1", "name": "conversation"},
+      {"id": "E2", "name": "context-panel"}
+    ],
+    "states": [{"id": "S1", "name": "wide-default"}],
+    "interactions": [{"id": "I1", "name": "send-message"}],
+    "motion": [{"id": "M1", "name": "message-arrival"}]
+  }
+}

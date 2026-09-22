@@ -1,0 +1,49 @@
+#!/usr/bin/env node
+// Reddit MCP wrapper. Vendored `reddit-mcp-buddy` via `npm ci --omit=dev`
+// from package.json. Default mode is anonymous (public RSS for subreddit
+// browsing). The user may optionally set REDDIT_CLIENT_ID and
+// REDDIT_CLIENT_SECRET to unlock search, comment threads, and user
+// analysis. The package ships with no embedded credentials; update and
+// rollback flows preserve any user-supplied values.
+//
+// Site copy MUST honestly describe the anonymous limitations and the
+// optional credentials that unlock the full surface. This package owns
+// distribution/ but not the production site directory; coordinate site
+// copy updates with the site owner.
+"use strict";
+
+const path = require("path");
+const { spawn } = require("child_process");
+const fs = require("fs");
+
+const here = __dirname;
+const root = path.resolve(here, "..");
+const pkg = "reddit-mcp-buddy";
+const candidates = [
+  path.join(root, "node_modules", pkg, "bin", "reddit-mcp-buddy.js"),
+  path.join(root, "node_modules", pkg, "dist", "index.js"),
+  path.join(root, "node_modules", ".bin", "reddit-mcp-buddy"),
+];
+
+let entry = null;
+for (const candidate of candidates) {
+  if (fs.existsSync(candidate)) {
+    entry = candidate;
+    break;
+  }
+}
+if (!entry) {
+  process.stderr.write(
+    "Vendored reddit-mcp-buddy not found. Run `npm ci --omit=dev` from the MCP vendor root before packaging.\n"
+  );
+  process.exit(2);
+}
+
+const child = spawn(process.execPath, [entry, ...process.argv.slice(2)], {
+  stdio: "inherit",
+  env: process.env,
+});
+child.on("exit", (code, signal) => {
+  if (signal) process.kill(process.pid, signal);
+  process.exit(code ?? 1);
+});

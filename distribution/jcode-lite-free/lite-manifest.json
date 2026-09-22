@@ -1,0 +1,141 @@
+{
+  "schema_version": "jcode-lite-free-manifest/v1",
+  "audience": "general",
+  "runtime": {
+    "source": "current-jcode-head",
+    "profile": "release-lto",
+    "cargo_default_features": false,
+    "cargo_features": [
+      "pdf",
+      "embeddings"
+    ],
+    "platforms": [
+      "macos-arm64",
+      "windows-x64"
+    ]
+  },
+  "include": {
+    "provider_onboarding": "standard-jcode-login",
+    "credentials": "user-supplied-after-install",
+    "skills": [
+      "anthropologist",
+      "cfo",
+      "client",
+      "compass",
+      "competitor",
+      "component-stress",
+      "consolidate-memory",
+      "debate",
+      "decision-board",
+      "design-variants",
+      "energy",
+      "ethics",
+      "first-principles",
+      "frontend-design",
+      "howtos",
+      "idea-forge",
+      "investor",
+      "journalist",
+      "landing-page",
+      "mage",
+      "mentor",
+      "motion-review",
+      "ops-diagnosis",
+      "pe-analyst",
+      "premortem",
+      "research",
+      "scroll-craft",
+      "seller",
+      "skeptic",
+      "statistician",
+      "stoic",
+      "synthesis",
+      "system-architect",
+      "taleb",
+      "wanderer"
+    ],
+    "roles": [
+      "implement",
+      "lab",
+      "research",
+      "verify"
+    ],
+    "mcp_servers": [
+      "playwright",
+      "context7",
+      "omnisearch",
+      "reddit"
+    ],
+    "features": [
+      "chat",
+      "image-input",
+      "tools",
+      "sessions",
+      "memory",
+      "memory-sidecar",
+      "memory-embeddings",
+      "pdf",
+      "mage",
+      "knowledge-os",
+      "playwright-browser-mcp",
+      "context7-research-mcp",
+      "omnisearch-research-mcp",
+      "reddit-research-mcp",
+      "semantic-native-consent-v1",
+      "jcodef",
+      "update",
+      "rollback",
+      "safe-removal-preserves-user-data"
+    ]
+  },
+  "exclude": {
+    "embedded_provider_credentials": true,
+    "preconfigured_provider_profiles": true,
+    "cargo_features": [
+      "bedrock"
+    ],
+    "external_runtime_dependencies": [
+      "sonar-scanner",
+      "container-runtime"
+    ],
+    "telemetry": true,
+    "skills": [
+      "visual-plan"
+    ]
+  },
+  "isolation": {
+    "macos_home": "$HOME/Library/Application Support/LeGrin/JcodeLiteFree/home",
+    "windows_home": "%LOCALAPPDATA%/LeGrin/JcodeLiteFree/home",
+    "sessions_subdirectory": "sessions",
+    "command": "jcodef",
+    "remove_default": "preserve-home",
+    "remove_purge_flag": "--purge-data",
+    "does_not_replace": [
+      "jcode",
+      "jcodel",
+      "~/.jcode"
+    ]
+  },
+  "vendor": {
+    "mcp_root": "preset/mcp",
+    "package_json": "preset/mcp/package.json",
+    "lock_file": "preset/mcp/package-lock.json",
+    "manifest": "preset/mcp/manifest.json",
+    "wrappers": "preset/mcp/bin",
+    "pinned_packages": {
+      "@playwright/mcp": "0.0.79",
+      "@upstash/context7-mcp": "4.0.2",
+      "mcp-omnisearch": "0.0.28",
+      "reddit-mcp-buddy": "1.1.14"
+    },
+    "install_command": "npm ci --omit=dev --ignore-scripts --no-audit --no-fund",
+    "playwright": {
+      "browser_download_forbidden": true,
+      "requires_system_chrome_or_edge": true,
+      "required_flags": [
+        "--headless",
+        "--isolated"
+      ]
+    }
+  }
+}

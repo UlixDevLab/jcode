@@ -1,0 +1,109 @@
+schema_version: project-os-schema/v2.2
+
+compatibility:
+  v1: "project-os-schema/v1 documents remain valid unchanged."
+  v2: "project-os-schema/v2 adds C4 containment, bundled relations, portals, and flows."
+  v2.1: "project-os-schema/v2.1 adds epistemic gate fields and superseded-node tombstones."
+  v2.2: "project-os-schema/v2.2 adds router nodes, conditioned relations, and direction: both edge sugar."
+
+v2:
+  version: project-os-schema/v2
+  nodes:
+    parent: "optional node id in the same graph; containment roots are depth 1 and maximum depth is 4"
+    intent: "optional one-line tooltip purpose, maximum 60 characters"
+    portals: "optional [{ view: different existing view id, node: existing node id in that view's graph }]"
+  edges:
+    relations: "optional [{ id, label, description: one line, mechanism: sync|async|batch, source_child?: strict descendant of source, target_child?: strict descendant of target, payloads?: [string] }]"
+  flows: "optional top-level [{ id, view: existing view id, label, participants: existing leaf nodes in the view graph, steps: [{ from: participant, to: participant, message, payload?, relation?: existing edge relation id }] }]"
+  validation:
+    duplicate_directed_edge: "one edge per (graph, source, target); reverse edges remain legal"
+    authoring_budget: "warnings only at 16, 21, and 26 direct children; see LOD authoring budget §3.1"
+
+v2.1:
+  version: project-os-schema/v2.1
+  nodes:
+    status: "erroneous requires reality.evidence describing the contradiction"
+    blocking: "optional boolean, valid only with status open-question"
+    entity: "optional global concept id string shared across views"
+    superseded_by: "tombstone replacement node id; tombstones contain only id, graph, superseded_by and may not be referenced"
+  gate: "optional { triaged: ISO date, triaged_by: non-empty string }"
+
+v2.2:
+  version: project-os-schema/v2.2
+  nodes:
+    type_router: "type: router marks a many-to-many junction (case/if/switch); requires at least two conditioned outbound relations"
+  edges:
+    direction: "optional 'both' authoring sugar; occupies both directed slots and renders as paired offset arcs (R2 no-double-head stays)"
+    relation_condition: "relations[].condition optional non-empty branch label; valid only on relations whose edge source node has type: router"
+  validation:
+    router_outbound: "router node must source at least two relations with non-empty condition"
+    condition_scope: "condition on a relation sourced by a non-router node is an error"
+    direction_both_conflict: "direction: both conflicts with any separate edge between the same node pair in the same graph"
+    gating: "router nodes, relation conditions, and edge direction require schema_version project-os-schema/v2.2"
+
+required_top_level_fields:
+  - schema_version
+  - project
+  - views
+  - graphs
+  - nodes
+  - edges
+
+reserved_board:
+  id: blueprint
+  required_in: [views, graphs]
+  may_be_empty: true
+
+reserved_roadmap_board:
+  id: roadmap
+  required_in: [views, graphs]
+  may_be_empty: true
+
+roadmap_phase:
+  type: phase
+  statuses: [parked, active, integrated]
+  required_fields: [memo, parked]
+  parked: "{ nodes: Blueprint-node schema[], edges: edge schema[] }; nested phases are forbidden in v1"
+
+optional_view_fields:
+  - layout: manual (honors YAML node positions; default is deterministic auto-layout)
+
+provenance:
+  template_prefix: template#
+  non_template_node_requires: [reality.evidence, source_trace_id]
+  non_template_edge_requires: [source_trace_id]
+
+custom_type_rule:
+  user_directive_required: true
+  accepted_markers:
+    - user_directive
+    - user_directive_ref
+    - user_directive_required
+
+open_question_required_fields:
+  - id
+  - question
+  - status
+  - evidence_refs
+
+optional_node_fields:
+  - graph
+  - target_axis (Blueprint nodes only; must name an existing non-Blueprint view and graph)
+  - summary
+  - c4_children
+  - drilldown_view
+  - "code_flow { source?: graphify, graph?: repository-relative graph path, roots: [repository-relative source path, ...], max_nodes?: integer 1..500 }; declares a render-time static code-flow projection and never stores generated symbols in project-os.yaml"
+  - details.sections[] { title, content }
+  - details.fields[] { name, description, ref? }
+  - details.links[] { label, board, node }
+  - "reality { kind: fact|decision|hypothesis|idea|inferred|placeholder, confidence: high|medium|low|unknown, evidence: [string, ...] } (optional B1 scoring tuple; legacy reality forms remain valid)"
+  - "certainty.weight (finite number in (0,100], B1 scoring only)"
+  - "certainty.question { cost?, hypotheses[] { id, label, prior?, dod, discriminated_by }, outcomes[] { id, label, likelihoods } } (B1 scoring input)"
+  - hypothesis_of (question node id)
+  - dod (non-empty completion criterion for a hypothesis node)
+  - discriminated_by (non-empty evidence/action that distinguishes a hypothesis)
+  - "boards { board_id: { axes?: { axis_id: weight }, boards?: { board_id: weight } } } (B1 scoring input)"
+  - "history[] (append-only shaping entries; never rewrite or remove prior entries): { ts: ISO8601|YYYY-MM-DD, kind: framed|question|hypothesis|answered|decided|rejected|integrated|activated, summary: string, ref?: { board, node }, trace?: source_trace_id }; non-framed entries require ref or trace"
+
+edge_ownership:
+  graph: optional; absent means a global cross-axis edge

@@ -1,0 +1,43 @@
+{
+  "product": "jcode-lite-free",
+  "channel": "beta",
+  "version": "0.3.0-beta.1",
+  "jcode_version": "0.86.0",
+  "minimum_node_major": 20,
+  "provider_mode": "user-configured",
+  "default_provider": null,
+  "default_model": null,
+  "memory_sidecar_enabled": true,
+  "memory_embeddings_compiled": true,
+  "pdf_compiled": true,
+  "knowledge_os_schema": "project-os-schema/v2.2",
+  "knowledge_os_renderer_sha256": {
+    "export-lite.mjs": "101ef35e1230ce2ef839bcd50429f4e3d78832878d13710dd3054969f6866748",
+    "renderer-template.html": "c8c0e6de1e412082f3ec5404d310e2823005206694845e1e5350566dae8976fe"
+  },
+  "mcp_vendor": {
+    "manifest": "preset/mcp/manifest.json",
+    "pinned_packages": {
+      "@playwright/mcp": "0.0.79",
+      "@upstash/context7-mcp": "4.0.2",
+      "mcp-omnisearch": "0.0.28",
+      "reddit-mcp-buddy": "1.1.14"
+    },
+    "playwright_required_flags": [
+      "--headless",
+      "--isolated"
+    ]
+  },
+  "build_recipe": {
+    "cargo_profile": "release-lto",
+    "cargo_args": [
+      "--no-default-features",
+      "--features",
+      "pdf,embeddings",
+      "--bin",
+      "jcode"
+    ]
+  },
+  "shared_release_version": "0.3.0-beta.1",
+  "shared_with_lite": true
+}

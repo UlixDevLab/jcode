@@ -1,0 +1,93 @@
+schema_version: project-os-catalog/v1
+
+extension_policy:
+  user_directive_required: true
+  note: Custom layer/node/edge/view/question/status types require an explicit user directive and provenance.
+
+history:
+  append_only: true
+  note: History entries record shaping provenance and are appended, never rewritten or removed.
+  kinds: [framed, question, hypothesis, answered, decided, rejected, integrated, activated]
+
+layer_types:
+  - { id: blueprint, label: Blueprint }
+  - { id: development, label: Development }
+  - { id: architecture, label: Architecture }
+  - { id: business, label: Business }
+  - { id: product, label: Product }
+  - { id: marketing, label: Marketing }
+  - { id: data, label: Data }
+  - { id: operations, label: Operations }
+  - { id: execution-evidence, label: Execution Evidence }
+
+node_types:
+  - root
+  - fact
+  - decision
+  - hypothesis
+  - question
+  - unknown
+  - architecture
+  - runtime
+  - data
+  - usage
+  - container
+  - capability
+  - phase
+  - code
+  - component
+  - method
+
+edge_types:
+  - relates_to
+  - depends_on
+  - supports
+  - contradicts
+  - answers
+  - realizes
+  - runs_in
+  - reads_writes
+  - uses
+  - calls
+  - contains
+
+view_types:
+  - architecture
+  - product
+  - delivery
+  - orchestration
+  - runtime
+  - data
+  - usage
+  - marketing
+  - service-arch
+  - code-flow
+  - userflows
+  - agent-pipelines
+  - onboarding
+
+question_types:
+  - unknown_layer
+  - assumption
+  - missing_evidence
+  - next_step
+
+question_hypothesis_contract:
+  owner: question
+  minimum_competing_hypotheses: 2
+  hypothesis_required_fields: [id, label, dod, discriminated_by]
+  prior: optional; defaults to a uniform distribution across competing hypotheses
+
+statuses:
+  - root
+  - main
+  - open
+  - accepted
+  - planned
+  - next
+  - blocked
+  - needs-thinking
+  - done
+  - unknown
+  - inferred
+  - frozen

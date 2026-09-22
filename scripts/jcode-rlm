@@ -1,0 +1,5 @@
+#!/bin/sh
+set -eu
+
+export JCODE_RLM_BINARY=1
+exec "${JCODE_RLM_BASE_BIN:-jcode}" "$@"

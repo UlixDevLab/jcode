@@ -1,0 +1,6 @@
+{
+  "present": ["E1", "S1", "I1", "M1"],
+  "deviations": [
+    {"id": "E2", "reason": "not in this approved platform slice"}
+  ]
+}

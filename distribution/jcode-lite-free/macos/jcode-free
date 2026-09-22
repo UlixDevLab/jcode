@@ -1,0 +1,41 @@
+#!/bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd -P)"
+INSTALL_ROOT="$HOME/Library/Application Support/LeGrin/JcodeLiteFree"
+case "$SCRIPT_DIR/" in
+  "$INSTALL_ROOT/"*) ;;
+  *) exec "$SCRIPT_DIR/install.command" "$@" ;;
+esac
+ROOT="$(cd "$SCRIPT_DIR/.." && pwd -P)"
+HOME_DIR="$ROOT/home"
+if [[ -x "$SCRIPT_DIR/runtime/node/bin/node" ]]; then
+  export PATH="$SCRIPT_DIR/runtime/node/bin:$PATH"
+fi
+
+command -v node >/dev/null 2>&1 || {
+  echo "Jcode Lite Free requires Node.js 20 or newer for Mage." >&2
+  exit 1
+}
+node_major="$(node -p 'process.versions.node.split(`.`)[0]')"
+(( node_major >= 20 )) || { echo "Jcode Lite Free requires Node.js 20 or newer." >&2; exit 1; }
+
+if [[ "${JCODE_LITE_FREE_UPDATE_CHECK:-1}" != "0" ]]; then
+  current_version="$(/usr/bin/plutil -extract version raw -o - "$SCRIPT_DIR/release.json")"
+  current_channel="$(/usr/bin/plutil -extract channel raw -o - "$SCRIPT_DIR/release.json")"
+  node "$SCRIPT_DIR/check-update.mjs" \
+    --manifest-url "${JCODE_LITE_FREE_UPDATE_CHECK_URL:-https://files.legrin-tech.net/jcode-lite-free/macos/manifest.json}" \
+    --trust "${JCODE_LITE_FREE_UPDATE_TRUST:-$SCRIPT_DIR/update-trust.json}" \
+    --verifier "$SCRIPT_DIR/verify-update-manifest.mjs" \
+    --product jcode-lite-free --platform macos --channel "$current_channel" \
+    --current-version "$current_version" --state "$HOME_DIR/update-check.json" \
+    --interval-hours "${JCODE_LITE_FREE_UPDATE_CHECK_INTERVAL_HOURS:-24}" \
+    --name "Jcode Lite Free" --update-command "$SCRIPT_DIR/update.command" || true
+fi
+
+export JCODE_HOME="$HOME_DIR"
+export KNOWLEDGE_OS_BIN="$SCRIPT_DIR/preset/knowledge-os/bin/knowledge-os-lite.mjs"
+export JCODE_NO_TELEMETRY=1
+unset JCODE_PROVIDER_ALLOWLIST
+
+exec "$SCRIPT_DIR/bin/jcode" --no-update "$@"

@@ -1,0 +1,10 @@
+{
+  "schema_version": "jcode-lite-update-trust/v1",
+  "keys": [
+    {
+      "algorithm": "ed25519",
+      "key_id": "ed25519-f320d16f4b9e143c",
+      "public_key_pem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAD6bP+JHK7U9p4NvKcMvN1yzgW1JVe0S+V0FUGFkPmWA=\n-----END PUBLIC KEY-----\n"
+    }
+  ]
+}

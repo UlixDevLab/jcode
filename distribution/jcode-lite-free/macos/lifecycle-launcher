@@ -1,0 +1,26 @@
+#!/bin/bash
+set -euo pipefail
+root="$HOME/Library/Application Support/LeGrin/JcodeLiteFree"
+root="$(cd "$root" && pwd -P)"
+version="$(/usr/bin/plutil -extract current raw -o - "$root/state.json")"
+[[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+[-A-Za-z0-9.]*$ ]] || { echo 'Invalid installed Free version.' >&2; exit 1; }
+app="$root/$version"
+case "${1:-}" in
+  update) shift; exec "$app/update.command" "$@" ;;
+  remove) shift; cd "$HOME"; exec "$app/remove.command" "$@" ;;
+esac
+export PATH="$app/runtime/node/bin:$PATH"
+export JCODE_HOME="$root/home" JCODE_LITE_ROOT="$root" JCODE_NO_TELEMETRY=1
+export KNOWLEDGE_OS_BIN="$app/preset/knowledge-os/bin/knowledge-os-lite.mjs"
+unset JCODE_PROVIDER_ALLOWLIST JCODE_MIGRATE_BINARY JCODE_LITE_UPDATE_REQUEST
+socket="$(node "$app/lifecycle/runtime.mjs" "$root")"
+export JCODE_RUNTIME_DIR="$root/runtime" JCODE_SOCKET="$socket"
+args=()
+while (( $# )); do
+  case "$1" in
+    --no-update|--no-selfdev) shift ;;
+    --socket|--socket=*) echo 'Free owns its isolated runtime socket.' >&2; exit 1 ;;
+    *) args+=("$1"); shift ;;
+  esac
+done
+exec "$app/bin/jcode" --no-update --no-selfdev --socket "$socket" ${args[@]+"${args[@]}"}

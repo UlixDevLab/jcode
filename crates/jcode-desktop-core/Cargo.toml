@@ -1,0 +1,13 @@
+[package]
+name = "jcode-desktop-core"
+version = "0.1.0"
+edition = "2024"
+publish = false
+description = "Framework-neutral state contracts for Jcode desktop clients"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+jcode-render-core = { path = "../jcode-render-core" }
+
+[dev-dependencies]
+serde_json = "1"

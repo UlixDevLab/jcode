@@ -1,0 +1,10 @@
+[
+  {"role":"user","content":[{"type":"text","text":"Archived task: inspect the first implementation path."}],"timestamp":null,"tool_duration_ms":null},
+  {"role":"assistant","content":[{"type":"text","text":"I will inspect it."}],"timestamp":null,"tool_duration_ms":null},
+  {"role":"assistant","content":[{"type":"tool_use","id":"old-read","name":"read","input":{"path":"src/old.rs"}}],"timestamp":null,"tool_duration_ms":null},
+  {"role":"user","content":[{"type":"tool_result","tool_use_id":"old-read","content":"old implementation evidence"}],"timestamp":null,"tool_duration_ms":null},
+  {"role":"assistant","content":[{"type":"text","text":"Archived reasoning prose must not become evidence."}],"timestamp":null,"tool_duration_ms":null},
+  {"role":"user","content":[{"type":"text","text":"Archived task: verify the final implementation and cite tool evidence."}],"timestamp":null,"tool_duration_ms":null},
+  {"role":"assistant","content":[{"type":"tool_use","id":"current-test","name":"bash","input":{"command":"cargo test"}}],"timestamp":null,"tool_duration_ms":null},
+  {"role":"user","content":[{"type":"tool_result","tool_use_id":"current-test","content":"tests passed; archived-sensitive-payload-never-render"}],"timestamp":null,"tool_duration_ms":null}
+]
