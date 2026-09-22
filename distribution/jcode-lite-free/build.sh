@@ -23,7 +23,7 @@ done
 [[ -f "$binary" ]] || { echo "Jcode binary not found: $binary" >&2; exit 1; }
 [[ -z "$node_runtime" || -f "$node_runtime" ]] || { echo "Node runtime archive not found: $node_runtime" >&2; exit 1; }
 [[ -x "$binary" ]] || { echo "Native binary is not executable" >&2; exit 1; }
-source_hash="$(git -C "$ROOT" rev-parse --short=9 HEAD)"
+source_hash="$(git -C "$ROOT" rev-parse --short HEAD)"
 binary_provenance="$("$ROOT/../jcode-lite/common/verify-binary-version.sh" "$binary" "$source_hash")"
 version="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["version"])' "$ROOT/release.json")"
 output="${output:-$ROOT/jcode-lite-free-$platform-$version.zip}"
