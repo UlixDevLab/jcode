@@ -117,7 +117,11 @@ touch -t 202608160000 "$stage"/* 2>/dev/null || true
 (cd "$stage" && find . -type f -print0 | xargs -0 touch -t 202608160000)
 (cd "$stage" && find . -type f -print | sed 's#^\./##' | LC_ALL=C sort > "$files")
 [[ ! -e "$output" ]] || { echo "Refusing to overwrite an existing artifact: $output" >&2; exit 1; }
-(cd "$stage" && zip -X -q "$output" -@ < "$files")
+if command -v zip >/dev/null 2>&1; then
+  (cd "$stage" && zip -X -q "$output" -@ < "$files")
+else
+  python3 "$ROOT/support/create-zip.py" "$stage" "$output" "$files"
+fi
 python3 "$ROOT/tests/verify-package.py" "$output"
 echo "Built $output"
 shasum -a 256 "$output"
