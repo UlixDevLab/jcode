@@ -23,6 +23,11 @@ if ([Console]::IsInputRedirected -and $env:JCODE_LITE_FREE_ALLOW_NONINTERACTIVE 
 if (![Environment]::Is64BitOperatingSystem -or [Environment]::OSVersion.Version.Major -lt 10) {
   throw "Jcode Lite Free requires 64-bit Windows 10 or newer."
 }
+# Prefer the packaged runtime, including when the recipient has no system Node.
+$bundledNode = Join-Path $PSScriptRoot "runtime\node"
+if (Test-Path (Join-Path $bundledNode "node.exe") -PathType Leaf) {
+  $env:Path = "$bundledNode;$env:Path"
+}
 $node = Get-Command node -ErrorAction SilentlyContinue
 if (!$node) { throw "Install Node.js 20 or newer, then retry." }
 $release = Get-Content (Join-Path $PSScriptRoot "release.json") -Raw | ConvertFrom-Json
