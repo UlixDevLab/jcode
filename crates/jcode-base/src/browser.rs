@@ -960,7 +960,7 @@ fn launch_firefox_detached() -> bool {
                 .stdout(std::process::Stdio::null())
                 .stderr(std::process::Stdio::null());
             if let Ok(child) = crate::platform::spawn_detached(&mut cmd) {
-                crate::platform::reap_detached(child);
+                drop(child); // DetachedChild already transfers ownership to the shared reaper.
                 return true;
             }
         }
@@ -994,7 +994,7 @@ fn launch_firefox_detached() -> bool {
             .stdout(std::process::Stdio::null())
             .stderr(std::process::Stdio::null());
         if let Ok(child) = crate::platform::spawn_detached(&mut cmd) {
-            crate::platform::reap_detached(child);
+            drop(child); // DetachedChild already transfers ownership to the shared reaper.
             return true;
         }
         false
