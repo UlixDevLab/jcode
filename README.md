@@ -1,32 +1,181 @@
-# Jcode Lite Free
+# Jcode Lite Free: ШІ-помічник для вашої щоденної роботи
 
-A credential-free distribution of [Jcode](https://github.com/1jehuang/jcode), maintained by UlixDevLab. It combines the upstream terminal agent with a curated setup for coding, research, design and management.
+**Опишіть задачу звичайними словами. Jcode допоможе розібратися, скласти план і виконати роботу з файлами та інструментами на вашому комп’ютері.**
 
-## Download and install
+Ця збірка від **UlixDevLab** призначена не лише для програмістів. Вона може бути корисною менеджеру, дизайнеру, досліднику, підприємцю або людині, яка тільки знайомиться з ШІ.
 
-Download an artifact for your platform from [Releases](https://github.com/UlixDevLab/jcode/releases). A source ZIP is **not** an installer. Only assets explicitly attached to a published release are release deliverables.
+**[Завантажити готову збірку →](https://github.com/UlixDevLab/jcode/releases/tag/lite-free-v0.3.0-beta.1)** · [Повідомити про проблему](https://github.com/UlixDevLab/jcode/issues) · [Оригінальний Jcode](https://github.com/1jehuang/jcode)
 
-- **Apple Silicon macOS:** extract `JcodeLiteFree-macos-arm64-…zip`, then double-click `install.command`. Node and the MCP packages are bundled. The installer creates `jcodef` and leaves ordinary `jcode`, its settings and its sessions alone.
-- **Windows x64:** use the Windows asset when available and double-click `install.cmd`. Platform availability and prerequisites are stated in each release. Do not use an ARM macOS archive on Windows or an Intel Mac.
-- Connect your own supported subscription/provider through the normal Jcode onboarding. Public-source builds do not embed Google OAuth application credentials: Gemini/Antigravity OAuth requires the existing client-ID/client-secret environment overrides; other provider login flows are unchanged. Choose the main model yourself. No subscription, API key, private router access or download PIN is included.
+> Це бета-версія: можливі помилки. Почніть із копії неважливої папки. Програма безкоштовна, але **доступ до моделей ШІ ви підключаєте власний**. Передавання своїх ключів або паролів автору збірки не потрібне.
 
-The macOS builds are ad-hoc signed, **not Developer ID notarized**. macOS can require its normal Privacy & Security / Open Anyway confirmation after an Internet download. Windows may show SmartScreen or organization-policy warnings. We do not disable these protections or promise zero prompts.
+## Що таке Jcode простими словами?
 
-## What this distribution adds
+Звичайний чат із ШІ переважно відповідає повідомленнями. **Jcode є агентом**: крім розмови, він може читати й редагувати файли, користуватися підключеними інструментами, досліджувати питання та виконувати багатокрокові завдання.
 
-- 35 curated skills for research, first-principles analysis, decisions, design, management and implementation, plus four packaged agent roles.
-- Bundled Playwright, Context7, Omnisearch and Reddit MCP packages. Playwright uses an isolated headless session and requires an installed supported browser. Services may require recipient-owned credentials for their optional capabilities.
-- Provider-neutral task-based delegation. Pick models in Jcode's agent configuration. Use fast configured models for bounded work and stronger ones where intellectual difficulty or independent review warrants it, not merely because a task has many tokens.
-- Native consent integration and preservation of useful local fixes. This is a guardrail, **not an operating-system sandbox** for arbitrary shell/MCP effects.
-- Isolated home/runtime, preserved personal skills and rules, package provenance, signed-manifest update verification and rollback-aware macOS installation.
-- Upstream v0.86/Jev implementation rather than a separate reimplementation. Live Jev service entitlement and performance depend on the user's setup. Unit-test results are not a production speed benchmark.
+Вікно Jcode виглядає як термінал: текст на екрані, а не звичний сайт. Для спілкування з помічником **не потрібно знати команди програмування**. Ви пишете, наприклад: «У цій папці матеріали про проєкт. Підготуй короткий огляд і список відкритих питань».
 
-On the macOS lifecycle release, run `/update_lite` inside an idle session or `jcodef update` in a terminal. The upstream `/update` remains separate. Updates use the configured signed distribution channel. A child process cannot replace aliases already loaded in a parent shell, so open a new terminal when prompted.
+Модель ШІ є «мозком» помічника. Jcode дає їй робоче середовище, контекст і доступні інструменти. Модель ви обираєте самі, тому якість, швидкість, ліміти й вартість залежать також від вашого провайдера.
 
-## Sources and provenance
+## Чим Lite Free відрізняється від оригінального Jcode?
 
-`SOURCE-PROVENANCE.json` pins the upstream version and the integrated source revision used for this export. This repository contains the runtime and Free distribution inputs, not the maintainer's private Lite credentials, personal configuration, mission/session history or private Git history. Some shared packaging helpers retain their historical `distribution/jcode-lite/common` location; the private edition itself is not distributed here.
+Ми не створюємо окремий ШІ й не видаємо можливості оригіналу за власні. Основа тут: **офіційний Jcode, оновлений до upstream v0.86**, із нашими сумісними доробками та готовим набором робочих інструментів.
 
-Build the CLI with Rust stable and `cargo build --release --locked --no-default-features --features pdf,embeddings --bin jcode`. The Free package recipe is `distribution/jcode-lite-free/build.sh`. Native Windows builds run in GitHub Actions, not through cross-compilation on the maintainer's Mac.
+| Що | Звідки це і навіщо |
+| --- | --- |
+| Розмова з моделями, робота з файлами, сесії та субагенти | Можливості самого Jcode. Субагент означає окремого помічника для частини задачі. |
+| **35 підібраних skills** | Готові підходи до дослідження, дизайну, аналізу, рішень і управління. Не треба збирати набір вручну. |
+| **4 підготовлені ролі агентів** | Робочі інструкції для спеціалізованих частин задачі. Це не чотири окремі платні акаунти. |
+| **Набір MCP-інструментів** | Готові з’єднання з браузерною автоматизацією, документацією та пошуком. Пакети інструментів входять у збірку. |
+| **Підхід до розподілу роботи між моделями** | Прості, чітко обмежені підзадачі доречно віддавати швидшим моделям, складні рішення та незалежну перевірку: сильнішим. Використовуються лише налаштовані вами моделі. |
+| **Пам’ять і робочий контекст** | Підготовлені налаштування пам’яті й інструменти Knowledge OS для роботи зі знаннями. Jcode може використовувати контекст попередньої роботи, а не починати все з нуля. |
+| **Ізольована інсталяція та збереження налаштувань** | Lite Free має окрему папку даних. Оновлення враховують власні навички й змінені правила користувача. Звичайний Jcode не має замінюватися цією збіркою. |
+| **Перевірка оновлень і локальні виправлення** | Походження пакета й контрольні суми перевіряються. На macOS додано узгоджене оновлення клієнта й його сервера з поверненням до сесії. |
 
-Upstream and local work remain attributed in their source copyright notices and `LICENSE`. Contributions are welcome. This is an independent distribution, not an official upstream Jcode release.
+**Free не містить** приватного роутера автора, підписки на Astra, чужих API-ключів, PIN-коду друзів або особистої історії автора. Приватний Lite для друзів є іншим продуктом. Тут ви отримуєте безкоштовний набір підходів та інструментів і підключаєте свої акаунти.
+
+### Чи стане робота дешевшою?
+
+Збірка задає принципи економної делегації, але не гарантує конкретний відсоток економії. Якщо підключено тільки одну модель, іншій моделі нема звідки взятися. Більше субагентів також може означати більше запитів.
+
+Основну модель обираєте ви. Сильніша модель потрібна через **складність мислення, відповідальність рішення або потребу в перевірці**, а не просто через довжину тексту. Стежте за лімітами й витратами у своєму акаунті провайдера.
+
+## Що потрібно для початку
+
+1. **Підтримуваний комп’ютер.** Mac з Apple Silicon (M1/M2/M3/M4 або новіший сумісний) чи Windows x64. Доступність конкретного пакета вказано в релізі. Збірка для ARM Mac не підходить для Intel Mac або Windows.
+2. **Інтернет і власний доступ до ШІ.** Наприклад, підтримуваний вхід через ваш акаунт або API-ключ. Умови підписок різняться: наявність платного чату не автоматично означає доступ через будь-який API.
+3. **Трохи часу на перший вхід.** Після підключення акаунта не потрібно входити щоразу.
+
+Node.js і пакети MCP входять у повні опубліковані інсталятори. Для їх використання не треба встановлювати Rust, Git або середовище програмування. Для браузерних завдань потрібен підтримуваний браузер, наприклад Chrome або Edge. Сам браузер у ZIP не включено. Деяким пошуковим сервісам потрібні ваші окремі ключі.
+
+## Як установити
+
+### 1. Завантажте саме інсталятор
+
+Відкрийте **[сторінку релізу](https://github.com/UlixDevLab/jcode/releases/tag/lite-free-v0.3.0-beta.1)** і розгорніть **Assets**.
+
+- Для Mac: файл `JcodeLiteFree-macos-arm64-…zip`.
+- Для Windows: файл `JcodeLiteFree-windows-x64-…zip`, якщо він уже доданий до релізу.
+- **Не обирайте `Source code (zip)` або `Source code (tar.gz)`**. Це код для розробників, а не готова програма.
+
+### 2. Розпакуйте й відкрийте інсталятор
+
+**Mac:** двічі натисніть ZIP, відкрийте отриману папку, двічі натисніть **`install.command`**.
+
+**Windows:** натисніть ZIP правою кнопкою, оберіть **«Видобути все» / Extract All**, відкрийте папку й двічі натисніть **`install.cmd`**. Не запускайте його прямо всередині ZIP.
+
+Прочитайте повідомлення у вікні. Після встановлення програму можна запустити командою **`jcodef`** у новому вікні термінала. У пакеті також є ярлик запуску `jcode-free.command` на Mac або `jcode-free.cmd` на Windows.
+
+### Чому система показує попередження?
+
+Наразі Mac-збірка має локальний технічний підпис, але **не має Apple Developer ID notarization**. Windows-збірка також не має довіреного комерційного підпису. Тому macOS Gatekeeper або Windows SmartScreen можуть попросити підтвердження чи заблокувати запуск відповідно до політик комп’ютера.
+
+Перевірте, що файл завантажено з нашого релізу. На власному Mac використовуйте стандартний шлях Apple **System Settings → Privacy & Security → Open Anyway**, якщо він доступний для цього файлу. На робочому комп’ютері зверніться до адміністратора. **Не вимикайте захист системи, не змінюйте системну політику PowerShell і не обходьте корпоративні обмеження заради встановлення.**
+
+Сертифікат HTTPS захищає завантаження, але не замінює підпис застосунку. Обіцянки «жодних дозволів на будь-якому комп’ютері» тут немає.
+
+### 3. Підключіть модель
+
+Після запуску скористайтеся початковим налаштуванням Jcode або введіть:
+
+```text
+/login
+```
+
+Оберіть провайдера й пройдіть запропонований вхід. Якщо використовується API-ключ, вводьте його лише у відповідне поле, а не в публічне повідомлення або скриншот.
+
+Потім оберіть модель:
+
+```text
+/model
+```
+
+Достатньо одного провайдера для старту. Додаткові можна підключити пізніше. **Astra буде доступною тільки якщо її підтримує та дозволяє саме ваш акаунт.**
+
+Технічна особливість публічних збірок: для Google Gemini/Antigravity OAuth не вшито дані OAuth-застосунку. Ці способи входу потребують додаткового налаштування власних client ID/secret через підтримувані змінні середовища. Новачку простіше почати з іншого доступного способу входу. Це не стосується всіх провайдерів загалом.
+
+## Перші задачі: можна просто скопіювати
+
+**Знайомство з матеріалами**
+> У папці «Проєкт» є документи. Поки нічого не змінюй. Поясни, що це за проєкт, що вже вирішено та яких даних бракує.
+
+**Для менеджера**
+> Із цих нотаток зустрічі зроби список рішень, задач, відповідальних і відкритих питань. Не вигадуй людей або терміни, яких немає в тексті.
+
+**Для дизайнера**
+> Переглянь цей опис сторінки. Запропонуй три різні структури, поясни компроміси й перевір, чи зрозуміла головна дія для відвідувача. Поки не змінюй файли.
+
+**Для дослідження**
+> Порівняй ці три продукти для моєї задачі. Відділи перевірені факти з посиланнями від припущень. Якщо даних немає, так і напиши.
+
+**Для складного рішення**
+> Допоможи оцінити цю ідею з погляду клієнта, фінансів і ризиків. Спочатку уточни мету. Наприкінці дай не більше трьох наступних дій.
+
+**Для навчання**
+> Я вперше користуюся ШІ-агентом. Пояснюй наступний крок простими словами та не встановлюй нічого без пояснення.
+
+Хороша задача містить **мету, матеріали, обмеження і бажаний результат**. Наприклад: «На основі цих файлів підготуй односторінковий огляд українською. Не використовуй зовнішні сервіси й не змінюй оригінали».
+
+## Що таке skills, ролі та MCP?
+
+**Skill**: готовий спосіб підходити до певної роботи. Серед включених є `/research`, `/first-principles`, `/decision-board`, `/skeptic`, `/cfo`, `/frontend-design`, `/landing-page`, `/ops-diagnosis` та інші. Почніть вводити `/`, щоб знайти доступні команди. Наприклад:
+
+```text
+/decision-board Чи варто запускати цю послугу? Ось контекст...
+```
+
+**Роль агента**: інструкція для помічника, який виконує окрему частину задачі. Делегація корисна не завжди. Для короткого питання достатньо прямої відповіді.
+
+**MCP**: спосіб підключити зовнішні інструменти до ШІ. У цій збірці підготовлено:
+
+- **Playwright**: робота з вебсторінками через браузер.
+- **Context7**: пошук актуальної технічної документації.
+- **Omnisearch**: підключення пошукових сервісів.
+- **Reddit**: робота з матеріалами й обговореннями Reddit.
+
+Підготовлений інструмент не означає безкоштовний доступ до кожного сервісу. Окремі функції потребують браузера, мережі, дозволів або власних ключів. Не надсилайте чужі персональні дані в зовнішні сервіси без відповідної підстави.
+
+## Пам’ять, приватність і дозволи
+
+Сесії, налаштування та пам’ять зберігаються в окремій папці Lite Free. Вони не входять у завантажений ZIP і не публікуються в цьому репозиторії:
+
+- Mac: `~/Library/Application Support/LeGrin/JcodeLiteFree/home`
+- Windows: `%LOCALAPPDATA%\LeGrin\JcodeLiteFree\home`
+
+**Локальне зберігання не означає повністю офлайн-роботу.** Для відповіді модель отримує контекст запиту, а інструменти можуть звертатися до зовнішніх сервісів. Jev та інші віддалені функції мають власні умови доступу й обробки даних. Не додавайте секрети в задачу без потреби.
+
+Jcode має механізми дозволів для захищених операцій, але це **не ізольована «пісочниця», яка технічно унеможливлює будь-яку небезпечну дію**. Особливо уважно перевіряйте запуск команд, надсилання повідомлень, видалення файлів і зміни налаштувань. ШІ може помилятися. Для важливих даних потрібні резервні копії.
+
+## Як оновлювати
+
+**На Mac:** у спокійній сесії, коли не виконується важлива задача, введіть **`/update_lite`**. Або відкрийте термінал і введіть **`jcodef update`**. Це команда саме нашої збірки, а не звичайний upstream `/update`.
+
+Оновлювач перевіряє підпис метаданих та контрольну суму пакета, оновлює клієнт і його окремий сервер, зберігає дані та намагається повернутися до сесії. Якщо показано помилку, збережіть її текст. Якщо змінився шлях запуску, відкрийте новий термінал: програма не може змінити вже завантажені aliases у батьківському вікні.
+
+**На Windows:** закрийте робочі сесії Jcode Lite Free, завантажте новий Windows ZIP із релізу й запустіть `install.cmd`. У пакеті також є `update.ps1` для перевіреного каналу оновлень. Повну macOS-поведінку автоматичної заміни сервера та повернення до сесії для Windows ми поки не заявляємо.
+
+Власні навички й змінені правила мають зберігатися. Проте перед важливим оновленням варто мати резервну копію папки `home`. Не видаляйте її, щоб «перевстановити начисто».
+
+## Якщо не працює
+
+| Що бачите | Що зробити |
+| --- | --- |
+| У ZIP тільки код і немає інсталятора | Ви завантажили Source code. Поверніться до Assets у релізі. |
+| «No provider configured» | Пройдіть `/login`, потім оберіть `/model`. |
+| Модель відсутня або «not allowed» | Перевірте доступ саме вашого провайдера. Встановлення програми не додає доступ до моделі. |
+| «Rate limit», «quota» | Перевірте ліміти або баланс провайдера. Не підключайте платний запасний маршрут навмання. |
+| Вікно відразу закривається | Відкрийте термінал вручну й запустіть `jcodef`, щоб прочитати помилку. |
+| `jcodef` не знайдено | Відкрийте нове вікно термінала після встановлення. Спробуйте ярлик у пакеті. |
+| Браузерна задача не запускається | Перевірте наявність підтримуваного Chrome/Edge та прочитайте точну помилку інструмента. |
+| Захист ОС або корпоративна політика блокує запуск | Скористайтеся стандартним дозволеним шляхом ОС або зверніться до адміністратора. Не вимикайте захист. |
+
+У [повідомленні про проблему](https://github.com/UlixDevLab/jcode/issues/new) напишіть: Mac чи Windows, версію збірки, що зробили, чого очікували та точний текст помилки. **Приберіть ключі, токени, паролі, приватні документи й особисті дані зі скриншотів та логів.**
+
+## Про Jev і швидкість
+
+У збірці використано реалізацію Jev з upstream Jcode, а не власну її копію. Наявність коду не гарантує, що ваш провайдер має потрібний сервіс або підписку. Ми не публікуємо неперевірених обіцянок прискорення «у стільки-то разів»: локальні тести не замінюють вимірювання реальних задач із доступним сервісом.
+
+## Для тих, кому потрібен код
+
+Це незалежна збірка, не офіційний реліз авторів Jcode. Авторство upstream і ліцензії збережено в [LICENSE](LICENSE) та файлах вихідного коду. Походження початкового експорту зафіксовано в [SOURCE-PROVENANCE.json](SOURCE-PROVENANCE.json). Точна версія кожного бінарного пакета вказана в його метаданих та примітках релізу.
+
+**Збірки виконуються вручну лише на Mac власника та його домашньому Windows-PC. GitHub Actions у цьому репозиторії вимкнено. Коміт або pull request не запускає збірку.** GitHub використовується для коду, обговорень і готових файлів релізу. Технічні деталі: [native builds](docs/NATIVE_BUILDS.md).
