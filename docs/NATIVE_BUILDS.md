@@ -8,7 +8,7 @@ Recipients do not need any of these tools. They download a release ZIP and use i
 
 ## Pin the inputs
 
-Use a clean checkout at a recorded commit. Keep `Cargo.lock`, MCP lockfiles, `.gitattributes`, update trust and renderer reference hashes unchanged. Record the full source commit, the binary's `version --json`, its SHA-256, the final ZIP SHA-256 and validation logs. The build recipe requires the binary revision to match its checkout. Never relabel an older executable as a new build.
+Use a clean checkout at a recorded commit. Keep `Cargo.lock`, MCP lockfiles, `.gitattributes`, update trust and renderer reference hashes unchanged. Record the full source commit, the binary's `version --json`, its SHA-256, the final ZIP SHA-256 and validation logs. By default, the build recipe requires the binary revision to match its checkout. For packaging-only changes, `--binary-source-commit COMMIT` permits reusing an executable from that ancestor only after the clean-checkout verifier confirms that no runtime, Cargo or build inputs changed. The package records binary and packaging commits separately. Never relabel an older executable as a new build.
 
 Keep source checkouts separate from shared caches. Reuse a configured Cargo target directory and package caches, with **one active writer per Cargo target**. Do not delete an existing checkout or cache to start a new build. Packaging-only retries should reuse the matching executable. Do not mutate an already published archive.
 
@@ -45,19 +45,22 @@ cargo build --profile release-lto --locked --no-default-features --features pdf,
 
 If `CARGO_TARGET_DIR` is not set, the executable is in the checkout's `target/release-lto/`. Set it explicitly when reusing the builder's existing shared cache. Do not run two builds against it concurrently.
 
-In Git Bash, from that same source checkout:
+In Git Bash, from that same source checkout (verify that `python3 --version` resolves to the real installed Python, not the Microsoft Store alias):
 
 ```bash
 set -euo pipefail
-mkdir -p artifacts
+artifact_dir="$(cd .. && pwd)/release-artifacts"
+mkdir -p "$artifact_dir"
 distribution/jcode-lite-free/build.sh --platform windows \
   --binary /absolute/path/to/target/release-lto/jcode.exe \
-  --output "$PWD/artifacts/JcodeLiteFree-windows-x64-VERSION.zip"
+  --output "$artifact_dir/JcodeLiteFree-windows-x64-VERSION.zip"
 python distribution/jcode-lite-free/support/bundle-windows-artifact.py \
-  artifacts/JcodeLiteFree-windows-x64-VERSION.zip
+  "$artifact_dir/JcodeLiteFree-windows-x64-VERSION.zip"
 python distribution/jcode-lite-free/tests/verify-package.py \
-  artifacts/JcodeLiteFree-windows-x64-VERSION.zip
+  "$artifact_dir/JcodeLiteFree-windows-x64-VERSION.zip"
 ```
+
+Keep output outside the source checkout so the packaging-only reuse check remains clean. When operating remotely, upload a script and run it with PowerShell `-File` or Bash rather than passing a long nested command string. This avoids Windows command-length limits and loss of argument quoting.
 
 The second step is essential: it adds the checksum-pinned official Windows Node distribution so recipients do not need Node installed separately. The builder has a Python ZIP fallback and Python checksum reporting, so Unix `zip` and `shasum` are not required. Preserve exact renderer bytes on checkout; `test_renderer_checkout.py` verifies this against independent pinned values.
 
