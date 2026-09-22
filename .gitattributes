@@ -1,0 +1,3 @@
+# These release-pinned assets must keep their exact bytes on every platform.
+distribution/jcode-lite/common/preset/knowledge-os/renderer/export-lite.mjs -text
+distribution/jcode-lite/common/preset/knowledge-os/renderer/renderer-template.html -text
