@@ -63,18 +63,22 @@ try {
   if ($robocopyExit -ge 8) {
     throw "Copying package files failed (robocopy exit code $robocopyExit)."
   }
-  foreach ($_ in (Get-Content (Join-Path $PSScriptRoot "allowlist.txt") | Where-Object { $_ })) {
-    if (!(Test-Path (Join-Path $stageTarget $_) -PathType Leaf)) {
-      throw "Package file missing after copy: $_"
-    }
-  }
+  # PowerShell 5 filesystem cmdlets fail on long MCP node_modules paths.
+  & node (Join-Path $PSScriptRoot "install-files.mjs") verify $stageTarget
+  if ($LASTEXITCODE -ne 0) { throw "Package file verification failed after copy." }
   $env:JCODE_HOME = $homeDir
   & (Join-Path $stageTarget "bin\jcode.exe") --no-update version | Out-Null
   if ($LASTEXITCODE -ne 0) { throw "Candidate Jcode Lite Free binary failed its startup health check." }
-  if (Test-Path $target) { Remove-Item $target -Recurse -Force }
+  if (Test-Path $target) {
+    & node (Join-Path $PSScriptRoot "install-files.mjs") remove-version $root $target
+    if ($LASTEXITCODE -ne 0) { throw "Could not retire the previous package tree." }
+  }
   Move-Item $stageTarget $target
 } finally {
-  if (Test-Path $stageTarget) { Remove-Item $stageTarget -Recurse -Force }
+  if (Test-Path $stageTarget) {
+    & node (Join-Path $PSScriptRoot "install-files.mjs") remove-version $root $stageTarget
+    if ($LASTEXITCODE -ne 0) { Write-Warning "Staging cleanup failed. Retained at $stageTarget" }
+  }
 }
 
 $configFile = Join-Path $homeDir "config.toml"
