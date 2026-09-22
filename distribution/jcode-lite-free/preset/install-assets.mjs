@@ -45,7 +45,7 @@ function collect(source, target, entries) {
   const stat = fs.lstatSync(source);
   if (stat.isSymbolicLink()) throw new Error(`Package contains linked asset: ${target}`);
   if (stat.isDirectory()) {
-    for (const name of fs.readdirSync(source).sort()) collect(path.join(source, name), path.join(target, name), entries);
+    for (const name of fs.readdirSync(source).sort()) collect(path.join(source, name), path.posix.join(target, name), entries);
   } else if (stat.isFile()) {
     entries.push({ source, relative: target, mode: stat.mode & 0o777 });
   } else throw new Error(`Unsupported packaged asset: ${target}`);

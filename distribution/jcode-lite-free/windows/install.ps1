@@ -1,6 +1,4 @@
 $ErrorActionPreference = "Stop"
-$bundledNode = Join-Path $PSScriptRoot "runtime\node"
-if (Test-Path (Join-Path $bundledNode "node.exe")) { $env:Path = "$bundledNode;$env:Path" }
 
 # Right-clicking install.ps1 and choosing "Run with PowerShell" launches
 # powershell.exe with -NonInteractive, which redirects stdin and closes the
@@ -80,6 +78,8 @@ if (!(Test-Path $configFile -PathType Leaf)) {
 }
 & node (Join-Path $target "preset\install-assets.mjs") (Join-Path $target "preset") $homeDir
 if ($LASTEXITCODE -ne 0) { throw "Managed asset migration failed. See the installer output before retrying." }
+& node (Join-Path $target "preset\mcp\bin\merge-mcp.mjs") --manifest (Join-Path $target "preset\mcp\manifest.json") --user-mcp (Join-Path $homeDir "mcp.json") --user-config $configFile --bundled-config (Join-Path $target "preset\config.toml")
+if ($LASTEXITCODE -ne 0) { throw "Bundled MCP registration failed. User-added servers were not intentionally replaced." }
 
 $stateNew = "$stateFile.new.$PID"
 @{ current = $release.version; previous = $previous } | ConvertTo-Json -Compress | Set-Content $stateNew -Encoding UTF8
@@ -108,10 +108,6 @@ if ($args.Count -gt 0 -and $args[0] -eq "remove") {
 }
 if (!(Test-Path $stateFile -PathType Leaf)) { throw "Jcode Lite Free is not installed." }
 $state = Get-Content $stateFile -Raw | ConvertFrom-Json
-if ($args.Count -gt 0 -and $args[0] -eq "update") {
-  & (Join-Path $root (Join-Path $state.current "update.ps1")) @($args | Select-Object -Skip 1)
-  exit $LASTEXITCODE
-}
 $launcher = Join-Path $root (Join-Path $state.current "jcode-free.ps1")
 if (!(Test-Path $launcher -PathType Leaf)) { throw "The current Jcode Lite Free launcher is missing." }
 & $launcher @args

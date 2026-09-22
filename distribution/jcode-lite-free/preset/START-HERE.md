@@ -1,161 +1,51 @@
-# Jcode Lite Free — start here
+# Jcode Lite Free: почніть тут
 
-Jcode Lite Free is an AI coding assistant that runs in your terminal.
+Це ШІ-помічник для роботи з файлами, дослідження, дизайну, управління та програмування. Напишіть задачу звичайними словами. Знати мову програмування не потрібно.
 
-Unlike the paid Lite build, **Free comes with no AI provider included**. You
-connect your own. What Free gives you is everything around the model: ready-made
-workflows, preinstalled tools, skills, and specialist agents.
+**Повна інструкція та приклади:** https://github.com/UlixDevLab/jcode#readme
+**Оновлення:** https://github.com/UlixDevLab/jcode/releases
 
-If you get stuck at any point, email **daniil.kovaliov@gmail.com**.
+## Що безкоштовно, а що підключаєте ви
 
----
+Збірка містить Jcode, підібрані навички, ролі та інструменти MCP. Власну підписку або API-ключ до підтримуваної моделі ви підключаєте самі. Тут немає чужих ключів, приватного роутера або включеної підписки на Astra. Ліміти й вартість запитів залежать від вашого провайдера.
 
-## What you need first
+## Встановлення
 
-**1. Runtime prerequisites.**
+1. Повністю розпакуйте ZIP. Не запускайте програму всередині архіву.
+2. На Apple Silicon Mac відкрийте `install.command` подвійним натисканням.
+3. На Windows x64 відкрийте `install.cmd` подвійним натисканням.
+4. Прочитайте повідомлення інсталятора. Після встановлення відкрийте новий термінал і введіть `jcodef`. Або скористайтеся `jcode-free.command` / `jcode-free.cmd` у пакеті.
 
-On Apple Silicon macOS, Node.js and npm are included. You do not need to
-install Node.js, Python or developer tools separately.
+Повні релізні пакети містять Node.js та npm. Не потрібно окремо встановлювати Python, Rust чи інші інструменти розробника. Для браузерних задач потрібен підтримуваний Chrome або Edge. Окремі пошукові сервіси можуть потребувати ваших ключів.
 
-For the current Windows package, install **Node.js version 20 or newer** first.
+Збірки поки не мають довіреного комерційного підпису та Apple notarization. Якщо ОС показує попередження, перевірте джерело завантаження й використовуйте стандартний дозволений шлях ОС. На корпоративному комп’ютері зверніться до адміністратора. Не вимикайте системний захист і не обходьте політики організації.
 
-Check by opening a terminal and typing:
+## Перший запуск
 
-```
-node --version
-```
+Введіть `/login` і підключіть власний акаунт. Далі `/model`, щоб обрати доступну модель. Для Google Gemini/Antigravity OAuth у збірках із публічного коду може знадобитися окреме налаштування client ID/secret. Доступ до конкретної моделі визначає провайдер, а не інсталятор.
 
-If you see `v20` or higher you are fine. Otherwise install the "LTS" version
-from <https://nodejs.org>, then close and reopen your terminal.
+Перший безпечний приклад:
 
-**2. An AI account of your own.** Any one of these works:
+> Прочитай файли в цій папці та поясни, про що вони. Поки нічого не змінюй. Скажи, якої інформації бракує.
 
-- **Anthropic Claude** — a Claude subscription, or an API key
-- **OpenAI / ChatGPT** — a subscription, or an API key
-- **GitHub Copilot** — an existing Copilot subscription
-- **Google Gemini**, **OpenRouter**, **MiniMax**, and others
+Інші приклади: підсумок зустрічі, план проєкту, порівняння продуктів, критика дизайну, аналіз ризиків. Почніть вводити `/`, щоб побачити доступні команди й навички.
 
-You need exactly one to start. You can add more later.
+## Оновлення і ваші дані
 
----
+- Mac: `/update_lite` у спокійній сесії або `jcodef update` у терміналі.
+- Windows: закрийте робочі сесії Lite Free, завантажте новий Windows ZIP і знову запустіть `install.cmd`. У пакеті є також `update.ps1` для перевіреного каналу оновлень.
+- Власні навички, змінені правила, сесії та налаштування зберігаються. Перед важливими змінами робіть резервну копію.
+- `jcodef remove` видаляє програму, але залишає дані. Не використовуйте `--purge-data`, якщо не хочете видалити їх назавжди.
 
-## Install
-
-### macOS
-
-1. Unzip the downloaded file (double-click it).
-2. Open the folder it creates.
-3. Double-click **`install.command`**.
-4. If macOS says *"unidentified developer"*: right-click the file, choose
-   **Open**, then **Open** again. Once only.
-
-### Windows
-
-1. Right-click the ZIP, choose **Extract All**, pick a folder.
-2. Open that folder.
-3. Double-click **`install.cmd`**.
-4. If SmartScreen shows a blue warning: **More info** → **Run anyway**.
-
----
-
-## Connect your AI account (one time)
-
-Start it:
-
-- **macOS:** double-click `jcode-free.command`
-- **Windows:** double-click `jcode-free.cmd`
-
-Then type:
-
-```
-/login
-```
-
-Pick your provider from the list and follow the prompts. For subscription
-logins a browser window opens; sign in and come back. For an API key, paste it
-when asked.
-
-Then choose a model:
-
-```
-/model
-```
-
-That is the whole setup. It is remembered, so you only do it once.
-
----
-
-## Run it
-
-Start it the same way (`jcode-free.command` / `jcode-free.cmd`), then type what
-you want in plain language:
-
-> read the files in this folder and tell me what this project does
-
-Run it from inside your project folder, or tell it the path.
-
----
-
-## If something goes wrong
-
-**"requires Node.js 20 or newer"**
-Install the LTS version from <https://nodejs.org>, then reopen your terminal.
-
-**"No provider configured" / it refuses to answer**
-You have not connected an account yet, or the login expired. Type `/login` and
-pick your provider again.
-
-**"Rate limited" / "usage limit reached" / "quota"**
-Your own account is out of capacity for now. Either wait for it to reset, or
-type `/model` and switch to another provider you have connected.
-
-**"Invalid API key" / "authentication failed"**
-The key was mistyped, revoked, or expired. Run `/login` again and re-enter it.
-
-**"zsh: killed" when you run it**
-macOS blocked the app because it was downloaded from the internet. Open Terminal
-and run this once, then try again:
-
-```
-xattr -dr com.apple.quarantine ~/Library/Application\ Support/LeGrin/JcodeLiteFree
-```
-
-Reinstalling with the current installer fixes this permanently.
-
-**The window opens and closes immediately**
-Open a terminal first, then drag `jcode-free` (macOS) or `jcode-free.ps1`
-(Windows) into it and press Enter, so you can read the error.
-
-**macOS: "unidentified developer"**
-Right-click → **Open** → **Open**.
-
-**Windows: SmartScreen warning**
-**More info** → **Run anyway**.
-
-**It answers, but poorly**
-Give it more context: name the file or folder, paste the exact error text, and
-say what you expected instead.
-
-**Anything else**
-Email **daniil.kovaliov@gmail.com** with what you did, what you expected, and
-the exact message (screenshot is fine).
-
----
-
-## Updating and removing
-
-- **Update:** `update.command` (macOS) / `update.ps1` (Windows)
-- **Roll back:** `rollback.command` / `rollback.ps1`
-- **Remove the app but keep your work:** run `jcodef remove`, or double-click
-  `remove.command` (macOS) / `remove.cmd` (Windows). This keeps sessions,
-  memory, provider logins, and settings for a future reinstall.
-- **Remove everything permanently:** run `jcodef remove --purge-data`, or run
-  the platform removal script with `--purge-data`. You must confirm the purge.
-
-Your isolated data is stored here, with sessions below `home/sessions`:
-
-- macOS: `~/Library/Application Support/LeGrin/JcodeLiteFree/home`
+Папка даних:
+- Mac: `~/Library/Application Support/LeGrin/JcodeLiteFree/home`
 - Windows: `%LOCALAPPDATA%\LeGrin\JcodeLiteFree\home`
 
-Do not manually delete the whole Jcode Lite Free folder unless you intend to
-delete that data too.
+Локальне зберігання не означає офлайн-роботу: контекст задач може надсилатися обраному провайдеру та підключеним сервісам. ШІ може помилятися. Дозволи Jcode є захисними механізмами, а не абсолютною ізоляцією довільних команд.
+
+## Якщо щось не працює
+
+Відкрийте термінал вручну й введіть `jcodef`, щоб вікно з помилкою не зникало. Для проблем із входом спробуйте `/login`, для вибору іншої доступної моделі: `/model`. Повідомлення про ліміт або заборонену модель перевіряйте в акаунті провайдера.
+
+Опишіть проблему тут: https://github.com/UlixDevLab/jcode/issues
+Додайте ОС, версію, свої кроки й точний текст помилки. Не додавайте ключі, паролі, токени чи приватні документи.

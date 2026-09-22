@@ -24,6 +24,8 @@ function fixture(t) {
 test('known unmodified assets advance while user edits and custom skills survive', t => {
   const { preset, home, put } = fixture(t);
   installAssets(preset, home);
+  const state = JSON.parse(fs.readFileSync(path.join(home, '.managed-assets.json'), 'utf8'));
+  assert.deepEqual(Object.keys(state.files).sort(), ['roles/implement.md', 'swarm-prompt.md']);
   put(home, 'roles/implement.md', 'my customization');
   put(home, 'skills/custom/SKILL.md', 'mine');
   put(preset, 'roles/implement.md', 'release two');

@@ -8,12 +8,14 @@ binary=""
 output=""
 skip_npm=""
 node_runtime=""
+binary_source_commit=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --platform) shift; platform="${1:?--platform requires macos or windows}" ;;
     --binary) shift; binary="${1:?--binary requires a path}" ;;
     --output) shift; output="${1:?--output requires a path}" ;;
     --skip-mcp-npm-ci) skip_npm=1 ;;
+    --binary-source-commit) shift; binary_source_commit="${1:?--binary-source-commit requires a commit}" ;;
     --node-runtime) shift; node_runtime="${1:?--node-runtime requires a path}" ;;
     *) echo "Unknown argument: $1" >&2; exit 2 ;;
   esac
@@ -24,6 +26,11 @@ done
 [[ -z "$node_runtime" || -f "$node_runtime" ]] || { echo "Node runtime archive not found: $node_runtime" >&2; exit 1; }
 [[ -x "$binary" ]] || { echo "Native binary is not executable" >&2; exit 1; }
 source_hash="$(git -C "$ROOT" rev-parse --short HEAD)"
+if [[ -n "$binary_source_commit" ]]; then
+  source_hash="$(python3 "$ROOT/support/verify-packaging-source.py" "$ROOT/../.." "$binary_source_commit")"
+fi
+packaging_commit="$(git -C "$ROOT" rev-parse HEAD)"
+binary_commit="$(git -C "$ROOT" rev-parse "${binary_source_commit:-HEAD}^{commit}")"
 binary_provenance="$("$ROOT/../jcode-lite/common/verify-binary-version.sh" "$binary" "$source_hash")"
 version="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["version"])' "$ROOT/release.json")"
 output="${output:-$ROOT/jcode-lite-free-$platform-$version.zip}"
@@ -56,10 +63,13 @@ cp "$ROOT/../jcode-lite/common/update-trust.json" "$stage/update-trust.json"
 cp "$ROOT/../jcode-lite/common/check-update.mjs" "$stage/check-update.mjs"
 cp "$ROOT/release.json" "$ROOT/lite-manifest.json" "$stage/"
 cp "$ROOT/../../LICENSE" "$stage/LICENSE"
-python3 - "$stage/release.json" "$stage/jcode-provenance.json" "$binary_provenance" <<'PROVENANCE'
+python3 - "$stage/release.json" "$stage/jcode-provenance.json" "$binary_provenance" "$binary_commit" "$packaging_commit" <<'PROVENANCE'
 import json,sys
-release_path,provenance_path,raw=sys.argv[1:]
+release_path,provenance_path,raw,binary_commit,packaging_commit=sys.argv[1:]
+
 provenance=json.loads(raw)
+provenance['binary_source_commit']=binary_commit
+provenance['packaging_source_commit']=packaging_commit
 release=json.load(open(release_path))
 release['jcode_version']=provenance['jcode_version']
 open(release_path,'w').write(json.dumps(release,indent=2)+'\n')
