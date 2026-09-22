@@ -1,6 +1,8 @@
 import importlib.util
 from pathlib import Path
 import tempfile
+import subprocess
+import sys
 import unittest
 import zipfile
 
@@ -38,6 +40,18 @@ class PortableZipTest(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     module.create(self.stage, self.output, self.listing)
                 self.assertFalse(self.output.exists())
+
+    def test_checksum_reporter_needs_only_python(self):
+        builder = Path(__file__).resolve().parents[1] / 'build.sh'
+        source = builder.read_text()
+        reporter = source.split("<<'CHECKSUM'\n", 1)[1].split('\nCHECKSUM', 1)[0]
+        payload = self.root / 'archive with spaces.zip'
+        payload.write_bytes(b'abc')
+        result = subprocess.run([sys.executable, '-', str(payload)], input=reporter,
+                                text=True, capture_output=True, check=True)
+        self.assertEqual(result.stdout,
+                         'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad'
+                         + '  ' + str(payload) + '\n')
 
     def test_symlinks_rejected(self):
         (self.stage / 'linked').symlink_to(self.stage / 'payload')

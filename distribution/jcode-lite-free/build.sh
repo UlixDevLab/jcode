@@ -124,4 +124,12 @@ else
 fi
 python3 "$ROOT/tests/verify-package.py" "$output"
 echo "Built $output"
-shasum -a 256 "$output"
+python3 - "$output" <<'CHECKSUM'
+import hashlib
+import sys
+with open(sys.argv[1], 'rb') as stream:
+    digest = hashlib.sha256()
+    for chunk in iter(lambda: stream.read(1024 * 1024), b''):
+        digest.update(chunk)
+print(digest.hexdigest() + '  ' + sys.argv[1])
+CHECKSUM
