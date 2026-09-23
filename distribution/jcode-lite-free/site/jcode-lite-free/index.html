@@ -788,7 +788,10 @@
       const jumpButtons = document.querySelectorAll('[data-jump-edition]');
 
       function setEdition(edition) {
-        editionViews.forEach((view) => { view.hidden = view.dataset.edition !== edition; });
+        const language = document.documentElement.lang === 'en' ? 'en' : 'uk';
+        editionViews.forEach((view) => {
+          view.hidden = view.dataset.edition !== edition || view.dataset.language !== language;
+        });
         editionButtons.forEach((button) => { button.setAttribute('aria-pressed', String(button.dataset.editionButton === edition)); });
         const params = new URLSearchParams(window.location.search);
         params.set('edition', edition);
@@ -797,12 +800,9 @@
 
       function setLanguage(language) {
         document.documentElement.lang = language;
-        // Among visible-by-edition views, show only the matching language
+        const edition = document.querySelector('[data-edition-button][aria-pressed="true"]').dataset.editionButton;
         editionViews.forEach((view) => {
-          if (!view.hidden) {
-            const matches = view.dataset.language === language;
-            view.hidden = !matches;
-          }
+          view.hidden = view.dataset.edition !== edition || view.dataset.language !== language;
         });
         languageButtons.forEach((button) => { button.setAttribute('aria-pressed', String(button.dataset.languageButton === language)); });
         const params = new URLSearchParams(window.location.search);
