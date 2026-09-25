@@ -57,6 +57,14 @@ jobs:
           set -euo pipefail
           actual="$(git rev-parse HEAD)"
           test "$actual" = "$EXPECTED_SOURCE_REF"
+          expected_build_input_digest="6132d87ead8556682e8b1fa4fa134ab4609140387bcd5f9bc52daf74a0e52b0a"
+          actual_build_input_digest="$(
+            LC_ALL=C git ls-files -s -- .cargo Cargo.lock Cargo.toml crates src \
+              | LC_ALL=C sort \
+              | shasum -a 256 \
+              | awk '{print $1}'
+          )"
+          test "$actual_build_input_digest" = "$expected_build_input_digest"
           python3 - <<'PY'
           import json
           from pathlib import Path
