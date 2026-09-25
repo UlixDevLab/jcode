@@ -1,0 +1,233 @@
+name: One-off native Intel macOS build
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_ref:
+        description: "Immutable full 40-character commit SHA of the reviewed source export"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build-native-intel:
+    name: Build custom-fork jcode (macOS Intel)
+    runs-on: macos-15-intel
+    timeout-minutes: 45
+    env:
+      # Baseline policy for this one-off artifact. The post-build Mach-O inspection
+      # records the actual load-command value and rejects a stricter result.
+      MACOSX_DEPLOYMENT_TARGET: "11.0"
+      JCODE_BUILD_SEMVER: "0.86.384"
+      JCODE_BUILD_GIT_HASH: "98690be3e46b436ad1fa708912e133ef4c40a73b"
+      JCODE_BUILD_GIT_DATE: "2026-09-23 20:48:48 +0200"
+      JCODE_BUILD_GIT_DIRTY: "false"
+      JCODE_BUILD_GIT_TAG: "v0.86.0-384-g98690be3e"
+      JCODE_NO_TELEMETRY: "1"
+      CARGO_TERM_COLOR: always
+
+    steps:
+      - name: Validate immutable source export revision
+        id: validate-source-ref
+        shell: bash
+        env:
+          SOURCE_REF: ${{ inputs.source_ref }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$SOURCE_REF" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "source_ref must be a lowercase full 40-character Git SHA" >&2
+            exit 2
+          fi
+          printf 'source_ref=%s\n' "$SOURCE_REF" >> "$GITHUB_OUTPUT"
+
+      - name: Check out reviewed immutable source export
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.validate-source-ref.outputs.source_ref }}
+          fetch-depth: 1
+
+      - name: Assert checked-out source export revision
+        id: source-revision
+        shell: bash
+        env:
+          EXPECTED_SOURCE_REF: ${{ steps.validate-source-ref.outputs.source_ref }}
+        run: |
+          set -euo pipefail
+          actual="$(git rev-parse HEAD)"
+          test "$actual" = "$EXPECTED_SOURCE_REF"
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          data = json.loads(Path("SOURCE-PROVENANCE.json").read_text(encoding="utf-8"))
+          if data.get("source_git_hash") != "98690be3e46b436ad1fa708912e133ef4c40a73b":
+              raise SystemExit("reviewed source hash mismatch")
+          if data.get("source_tree") != "4c9d18d36cd7a1ee284d8c164a943e9704042bb2":
+              raise SystemExit("reviewed source tree mismatch")
+          PY
+          printf 'export_revision=%s\n' "$actual" >> "$GITHUB_OUTPUT"
+
+      - name: Assert native Intel runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(uname -s)" = "Darwin"
+          test "$(uname -m)" = "x86_64"
+          mkdir -p evidence
+          {
+            uname -a
+            uname -m
+            sw_vers
+          } | tee evidence/runner.txt
+
+      - name: Install stable Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Assert native Rust host
+        shell: bash
+        run: |
+          set -euo pipefail
+          rustc -vV | tee evidence/rustc-vV.txt
+          grep -qx 'host: x86_64-apple-darwin' evidence/rustc-vV.txt
+          cargo -V | tee evidence/cargo-version.txt
+
+      - name: Build release binary natively
+        shell: bash
+        run: |
+          set -euo pipefail
+          cargo build --locked --release --package jcode --bin jcode
+
+      - name: Verify binary architecture, version, and deployment target
+        shell: bash
+        run: |
+          set -euo pipefail
+          binary=target/release/jcode
+          test -x "$binary"
+          file "$binary" | tee evidence/file.txt
+          lipo -archs "$binary" | tee evidence/lipo-archs.txt
+          grep -qw x86_64 evidence/lipo-archs.txt
+          otool -l "$binary" | tee evidence/otool-l.txt
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+
+          text = Path("evidence/otool-l.txt").read_text(encoding="utf-8")
+          minos = re.search(r"(?m)^\s*minos\s+([0-9.]+)\s*$", text)
+          legacy = re.search(r"(?m)^\s*version\s+([0-9.]+)\s*$", text)
+          value = (minos or legacy)
+          if not value:
+              raise SystemExit("Unable to find Mach-O minimum macOS load command")
+          observed = value.group(1)
+          observed_tuple = tuple(int(p) for p in observed.split("."))
+          if observed_tuple > (11, 0):
+              raise SystemExit(
+                  f"Observed minimum macOS {observed} is stricter than the approved 11.0 baseline"
+              )
+          Path("evidence/minimum-macos.txt").write_text(observed + "\n", encoding="utf-8")
+          PY
+          export JCODE_HOME="$RUNNER_TEMP/jcode-intel-home"
+          mkdir -p "$JCODE_HOME"
+          "$binary" --no-update version --json | tee evidence/version.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          expected = "98690be3e46b436ad1fa708912e133ef4c40a73b"
+          data = json.loads(Path("evidence/version.json").read_text(encoding="utf-8"))
+          if data.get("git_hash") != expected:
+              raise SystemExit(f"version git_hash mismatch: {data.get('git_hash')!r}")
+          if data.get("semver") != "0.86.384":
+              raise SystemExit(f"version semver mismatch: {data.get('semver')!r}")
+          if not str(data.get("version", "")).startswith("v0.86.384-dev ("):
+              raise SystemExit(f"unexpected development version display: {data.get('version')!r}")
+          PY
+
+      - name: Run isolated no-auth server health smoke
+        shell: bash
+        run: |
+          set -euo pipefail
+          binary=target/release/jcode
+          export JCODE_HOME="$RUNNER_TEMP/jcode-intel-home"
+          socket="$RUNNER_TEMP/jcode-intel.sock"
+          "$binary" --no-update --no-selfdev --socket "$socket" server start --json \
+            | tee evidence/server-start.json
+          test -S "$socket"
+          "$binary" --no-update --no-selfdev --socket "$socket" server stop --force --json \
+            | tee evidence/server-stop.json
+          test ! -S "$socket"
+          printf 'isolated server start/socket/stop completed without provider authentication\n' \
+            > evidence/server-health-smoke.txt
+
+      - name: Assemble binary and provenance artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          binary=target/release/jcode
+          mkdir -p dist
+          cp "$binary" dist/jcode-macos-x86_64
+          chmod 0755 dist/jcode-macos-x86_64
+          shasum -a 256 dist/jcode-macos-x86_64 | awk '{print $1}' > evidence/binary-sha256.txt
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          def text(name):
+              return Path(name).read_text(encoding="utf-8").strip()
+
+          provenance = {
+              "schema_version": "jcode-lite-native-binary-provenance/v1",
+              "source_git_hash": "98690be3e46b436ad1fa708912e133ef4c40a73b",
+              "source_tree": "4c9d18d36cd7a1ee284d8c164a943e9704042bb2",
+              "export_revision": "${{ steps.source-revision.outputs.export_revision }}",
+              "target": "x86_64-apple-darwin",
+              "binary_sha256": text("evidence/binary-sha256.txt"),
+              "jcode_version": "0.86.384-dev",
+              "version_json": json.loads(Path("evidence/version.json").read_text(encoding="utf-8")),
+              "native_validation": {
+                  "runner_os": "Darwin",
+                  "runner_arch": "x86_64",
+                  "command": "jcode --no-update version --json",
+                  "status": "passed",
+              },
+              "minimum_macos_version": text("evidence/minimum-macos.txt"),
+              "evidence": {
+                  "workflow_run_id": "${{ github.run_id }}",
+                  "file": text("evidence/file.txt"),
+                  "lipo_archs": text("evidence/lipo-archs.txt"),
+                  "otool_min_macos": text("evidence/minimum-macos.txt"),
+                  "rust_host": next(
+                      line for line in text("evidence/rustc-vV.txt").splitlines()
+                      if line.startswith("host: ")
+                  ),
+                  "rust_toolchain": text("evidence/rustc-vV.txt"),
+                  "server_health_smoke": text("evidence/server-health-smoke.txt"),
+              },
+          }
+          Path("dist/jcode-macos-x86_64.provenance.json").write_text(
+              json.dumps(provenance, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+          )
+          PY
+          cp evidence/* dist/
+
+      - name: Upload private build evidence artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: jcode-native-intel-${{ github.run_id }}
+          if-no-files-found: error
+          retention-days: 7
+          path: |
+            dist/jcode-macos-x86_64
+            dist/jcode-macos-x86_64.provenance.json
+            dist/file.txt
+            dist/lipo-archs.txt
+            dist/otool-l.txt
+            dist/minimum-macos.txt
+            dist/version.json
+            dist/runner.txt
+            dist/rustc-vV.txt
+            dist/cargo-version.txt
+            dist/server-start.json
+            dist/server-stop.json
+            dist/server-health-smoke.txt
+            dist/binary-sha256.txt
