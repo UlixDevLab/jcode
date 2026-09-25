@@ -1,12 +1,35 @@
 {
-  "upstream_tag": "v0.86.0",
-  "upstream_commit": "e589cbe5aaa57ea2203fd5c7f7eb37bbeb2006fc",
-  "integration_commit": "71f5a6c0fba1aba48609166c93bcf0a982c02986",
-  "exported_file_count": 2117,
-  "scope": "runtime and credential-free edition only, no local history or private edition assets",
-  "public_export_adjustments": [
-    "Native Windows packaging and CI",
-    "Verifier vendor-license correction",
-    "Removed upstream Google OAuth application identifiers and secrets. Existing recipient environment overrides remain, with explicit configuration error before login or refresh. No GitHub push-protection bypass."
-  ]
+  "build_input_paths": [
+    ".cargo",
+    "Cargo.lock",
+    "Cargo.toml",
+    "crates",
+    "src"
+  ],
+  "effective_build_input_digest": "616c1d6c045a6dd6047f2bca8ddda3c5fb6b7cad3feca5724461ec4bb3e7b213",
+  "effective_export_revision": "The immutable Git commit containing this file. The registration workflow pins it by full SHA and records it in the binary provenance.",
+  "exclusions": [
+    "All private Lite packaging files and bundles",
+    "Distribution manifests, private site tooling, PINs, router configuration, OAuth credentials, and local user state",
+    "All pre-existing CI/release workflows"
+  ],
+  "parity": "For the declared build inputs, every tracked blob except the two sanitization paths equals source_base_git_hash. This is intentionally not whole-source parity.",
+  "public_export_base": "4801ab3209f69d0d4398d34241158c4c23844792",
+  "purpose": "one-off native macOS Intel build only",
+  "remote_state": "not pushed; no workflow dispatched",
+  "sanitization": {
+    "availability_limit": "The direct Antigravity and Gemini Google OAuth flows cannot use embedded application credentials in this export. Environment-provided approved OAuth configuration remains the only supported direct configuration where the public-base code supports it; otherwise login or refresh fails explicitly.",
+    "changed_build_input_paths": [
+      "crates/jcode-base/src/auth/antigravity.rs",
+      "crates/jcode-base/src/auth/gemini.rs"
+    ],
+    "credential_handling": "Both paths retain the already published public-base credential-safe implementation. No embedded upstream OAuth application identifiers or secrets are exported."
+  },
+  "schema": "jcode-native-source-export/v2",
+  "source_base_git_hash": "98690be3e46b436ad1fa708912e133ef4c40a73b",
+  "source_base_tree": "4c9d18d36cd7a1ee284d8c164a943e9704042bb2",
+  "source_semver": "0.86.384",
+  "workflow_entrypoint": "The separately reviewed default-main registration workflow checks out the caller-selected immutable effective export revision and rejects wrong source, tree, or build-input digest.",
+  "workflow_permissions": "contents: read",
+  "workflow_trigger": "workflow_dispatch only"
 }

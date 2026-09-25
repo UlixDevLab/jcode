@@ -187,6 +187,7 @@ fn ssh_remote_history_is_authoritative_even_when_empty_or_server_version_differs
             status_detail: None,
             upstream_provider: None,
             resolved_credential: None,
+            available_reasoning_efforts: None,
             reasoning_effort: None,
             service_tier: None,
             compaction_mode: crate::config::CompactionMode::Reactive,

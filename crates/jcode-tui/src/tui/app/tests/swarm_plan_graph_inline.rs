@@ -561,10 +561,12 @@ fn history_event_for_session(session_id: &str) -> crate::protocol::ServerEvent {
         status_detail: None,
         upstream_provider: None,
         resolved_credential: None,
+        available_reasoning_efforts: None,
         reasoning_effort: None,
         service_tier: None,
         compaction_mode: crate::config::CompactionMode::Reactive,
-        activity: None, activity_context: None,
+        activity: None,
+        activity_context: None,
         side_panel: crate::side_panel::SidePanelSnapshot::default(),
     }
 }
@@ -1104,7 +1106,9 @@ fn test_local_clear_command_empties_margin_info_widget_diagram_list() {
     assert!(super::commands::handle_session_command(&mut app, "/clear"));
 
     assert!(
-        crate::tui::TuiState::info_widget_data(&app).diagrams.is_empty(),
+        crate::tui::TuiState::info_widget_data(&app)
+            .diagrams
+            .is_empty(),
         "FIX: after local /clear the Margin info widget lists no diagram \
          from the discarded transcript"
     );

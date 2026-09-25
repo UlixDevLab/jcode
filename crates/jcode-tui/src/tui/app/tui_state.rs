@@ -110,7 +110,7 @@ impl App {
     /// reported one yet, so pre-settle effort cycling starts from the value the
     /// session will actually use instead of assuming the maximum.
     pub(super) fn remote_reasoning_effort_hint(&self) -> Option<String> {
-        if crate::tui::is_ssh_remote() {
+        if self.remote_available_reasoning_efforts.is_some() || crate::tui::is_ssh_remote() {
             return self.remote_reasoning_effort.clone();
         }
         self.remote_reasoning_effort.clone().or_else(|| {

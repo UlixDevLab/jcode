@@ -179,6 +179,7 @@ pub(crate) fn configure_provider_profile(
         models: vec![NamedProviderModelConfig {
             id: model.clone(),
             reasoning: None,
+            reasoning_efforts: None,
             reasoning_effort: None,
             context_window: options.context_window,
             input: Vec::new(),

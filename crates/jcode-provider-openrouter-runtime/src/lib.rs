@@ -913,7 +913,7 @@ pub struct OpenRouterProvider {
     reasoning_effort_support: Option<bool>,
     disable_reasoning_heuristics: bool,
     /// Per-model `(supports effort, default effort)` overrides from a named profile.
-    static_reasoning_config: HashMap<String, (Option<bool>, Option<String>)>,
+    static_reasoning_config: HashMap<String, (Option<bool>, Option<String>, Option<Vec<String>>)>,
     max_tokens: Option<u32>,
     /// Extra top-level JSON object fields merged into every chat/completions
     /// request body (e.g. NVIDIA NIM DeepSeek-V4 `chat_template_kwargs`).
@@ -943,6 +943,20 @@ pub struct OpenRouterProvider {
 }
 
 impl OpenRouterProvider {
+    // Swarm is a routing mode, not a provider effort. Clamp its configured root
+    // to this model's advertised ladder without changing the stored mode.
+    fn resolve_swarm_effort<'a>(&self, requested: &'a str) -> Option<&'static str> {
+        let available = self.available_efforts();
+        let ladder = jcode_provider_core::OPENAI_SELECTABLE_EFFORTS;
+        let rank = ladder.iter().position(|e| *e == requested)?;
+        ladder[..=rank]
+            .iter()
+            .rev()
+            .chain(ladder.iter())
+            .find(|e| !jcode_base::prompt::is_swarm_effort(e) && available.contains(e))
+            .copied()
+    }
+
     /// Apply a real (already resolved) effort without changing the stored swarm mode.
     fn apply_resolved_reasoning_effort(
         &self,
@@ -1007,8 +1021,8 @@ impl OpenRouterProvider {
         if self.model_reasoning_support() == Some(false) {
             return false;
         }
-        if let Some(explicit) = self.reasoning_effort_support {
-            return explicit;
+        if self.reasoning_effort_support == Some(false) {
+            return false;
         }
         if Self::profile_supports_reasoning_effort(self.profile_id.as_deref()) {
             return true;
@@ -1043,8 +1057,8 @@ impl OpenRouterProvider {
         if let Some(explicit) = self.model_reasoning_support() {
             return explicit;
         }
-        if self.reasoning_effort_support == Some(false) {
-            return false;
+        if let Some(explicit) = self.reasoning_effort_support {
+            return explicit;
         }
         if Self::profile_supports_openai_reasoning_effort(self.profile_id.as_deref()) {
             return true;
@@ -1064,13 +1078,19 @@ impl OpenRouterProvider {
             .unwrap_or_default()
     }
 
-    fn model_reasoning_config(&self) -> Option<&(Option<bool>, Option<String>)> {
+    fn model_reasoning_config(
+        &self,
+    ) -> Option<&(Option<bool>, Option<String>, Option<Vec<String>>)> {
         let model = self.model_snapshot().trim().to_ascii_lowercase();
         self.static_reasoning_config.get(&model)
     }
 
     fn model_reasoning_support(&self) -> Option<bool> {
-        self.model_reasoning_config().and_then(|config| config.0)
+        self.model_reasoning_config().and_then(|config| {
+            config
+                .0
+                .or_else(|| config.2.as_ref().map(|efforts| !efforts.is_empty()))
+        })
     }
 
     fn configured_effort_for_model(&self) -> Option<String> {
@@ -1086,6 +1106,14 @@ impl OpenRouterProvider {
     }
 
     pub(crate) fn supports_any_reasoning_effort(&self) -> bool {
+        if self.model_reasoning_support() == Some(false)
+            || self
+                .model_reasoning_config()
+                .and_then(|config| config.2.as_ref())
+                .is_some_and(Vec::is_empty)
+        {
+            return false;
+        }
         self.supports_deepseek_reasoning_effort()
             || self.supports_openai_reasoning_effort()
             || Self::profile_supports_unified_reasoning(
@@ -1095,6 +1123,19 @@ impl OpenRouterProvider {
     }
 
     pub(crate) fn normalize_reasoning_effort_for_self(&self, effort: &str) -> Option<String> {
+        if let Some(configured) = self
+            .model_reasoning_config()
+            .and_then(|config| config.2.as_ref())
+        {
+            if jcode_base::prompt::is_swarm_effort(effort) {
+                return (!configured.is_empty()).then(|| effort.to_string());
+            }
+            let canonical = jcode_provider_core::canonical_reasoning_effort(effort)?;
+            return configured
+                .iter()
+                .any(|e| e.trim().eq_ignore_ascii_case(canonical))
+                .then(|| canonical.to_string());
+        }
         if self.supports_deepseek_reasoning_effort() {
             Self::normalize_reasoning_effort(effort)
         } else if self.supports_openai_reasoning_effort() {
@@ -1459,18 +1500,48 @@ impl OpenRouterProvider {
                 Some((id.to_ascii_lowercase(), supports_images))
             })
             .collect::<HashMap<_, _>>();
+        for model in &profile.models {
+            if let Some(efforts) = &model.reasoning_efforts {
+                for effort in efforts {
+                    anyhow::ensure!(
+                        jcode_provider_core::canonical_reasoning_effort(effort).is_some(),
+                        "Unknown reasoning effort '{}' for model '{}' on profile '{}'",
+                        effort,
+                        model.id,
+                        profile_name
+                    );
+                }
+                if let Some(default) = &model.reasoning_effort {
+                    anyhow::ensure!(
+                        efforts
+                            .iter()
+                            .any(|e| e.trim().eq_ignore_ascii_case(default.trim())),
+                        "Default effort '{}' is not supported by model '{}'",
+                        default,
+                        model.id
+                    );
+                }
+            }
+        }
         let static_reasoning_config = profile
             .models
             .iter()
             .filter_map(|model| {
                 let id = model.id.trim();
-                if id.is_empty() || (model.reasoning.is_none() && model.reasoning_effort.is_none())
+                if id.is_empty()
+                    || (model.reasoning.is_none()
+                        && model.reasoning_effort.is_none()
+                        && model.reasoning_efforts.is_none())
                 {
                     return None;
                 }
                 Some((
                     id.to_ascii_lowercase(),
-                    (model.reasoning, model.reasoning_effort.clone()),
+                    (
+                        model.reasoning,
+                        model.reasoning_effort.clone(),
+                        model.reasoning_efforts.clone(),
+                    ),
                 ))
             })
             .collect::<HashMap<_, _>>();

@@ -1186,6 +1186,7 @@ pub struct App {
     remote_startup_phase: Option<RemoteStartupPhase>,
     remote_startup_phase_started: Option<Instant>,
     remote_reasoning_effort: Option<String>,
+    remote_available_reasoning_efforts: Option<Vec<String>>,
     remote_service_tier: Option<String>,
     remote_transport: Option<String>,
     remote_compaction_mode: Option<crate::config::CompactionMode>,

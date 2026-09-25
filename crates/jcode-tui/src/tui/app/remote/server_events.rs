@@ -1593,6 +1593,7 @@ pub(in crate::tui::app) fn handle_server_event(
             upstream_provider,
             resolved_credential,
             reasoning_effort,
+            available_reasoning_efforts,
             service_tier,
             compaction_mode,
             activity,
@@ -1781,8 +1782,12 @@ pub(in crate::tui::app) fn handle_server_event(
             if session_changed || status_detail.is_some() {
                 app.status_detail = status_detail;
             }
-            if session_changed || reasoning_effort.is_some() {
+            if session_changed
+                || reasoning_effort.is_some()
+                || available_reasoning_efforts.is_some()
+            {
                 app.remote_reasoning_effort = reasoning_effort;
+                app.remote_available_reasoning_efforts = available_reasoning_efforts;
             }
             app.remote_service_tier = service_tier;
             app.remote_compaction_mode = Some(compaction_mode);
@@ -2349,6 +2354,9 @@ pub(in crate::tui::app) fn handle_server_event(
             } else {
                 app.update_context_limit_for_model(&model);
                 app.remote_provider_model = Some(model.clone());
+                app.remote_reasoning_effort = None;
+                app.remote_available_reasoning_efforts = Some(Vec::new());
+                remote.refresh_model_catalog_detached();
                 app.clear_remote_startup_phase();
                 if let Some(ref pname) = provider_name {
                     app.remote_provider_name = Some(pname.clone());
@@ -2438,6 +2446,7 @@ pub(in crate::tui::app) fn handle_server_event(
                     "Failed to set effort: {}",
                     err
                 )));
+                remote.refresh_model_catalog_detached();
             } else {
                 app.remote_reasoning_effort = effort.clone();
                 let label = effort

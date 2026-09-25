@@ -139,9 +139,16 @@ impl Provider for OpenRouterProvider {
         }
 
         let sent_reasoning_config = reasoning_effort.as_deref().is_some_and(|effort| {
-            let resolved =
-                jcode_base::prompt::swarm_root_reasoning_effort(effort).unwrap_or(effort);
-            self.apply_resolved_reasoning_effort(&mut request, resolved, strict_openai_schema)
+            let resolved = if jcode_base::prompt::is_swarm_effort(effort) {
+                self.resolve_swarm_effort(
+                    jcode_base::prompt::swarm_root_reasoning_effort(effort).unwrap_or("max"),
+                )
+            } else {
+                Some(effort)
+            };
+            resolved.is_some_and(|value| {
+                self.apply_resolved_reasoning_effort(&mut request, value, strict_openai_schema)
+            })
         });
 
         if !api_tools.is_empty() {
@@ -455,6 +462,10 @@ impl Provider for OpenRouterProvider {
         let mut accepted = self.available_efforts().contains(&requested.as_str());
         if !self.supports_deepseek_reasoning_effort()
             && !self.supports_openai_reasoning_effort()
+            && self
+                .model_reasoning_config()
+                .and_then(|config| config.2.as_ref())
+                .is_none()
             && requested == "max"
         {
             accepted = true;
@@ -475,6 +486,20 @@ impl Provider for OpenRouterProvider {
     }
 
     fn available_efforts(&self) -> Vec<&'static str> {
+        if !self.supports_any_reasoning_effort() {
+            return vec![];
+        }
+        if let Some(configured) = self
+            .model_reasoning_config()
+            .and_then(|config| config.2.as_ref())
+        {
+            let mut efforts: Vec<_> = configured
+                .iter()
+                .filter_map(|effort| jcode_provider_core::canonical_reasoning_effort(effort))
+                .collect();
+            efforts.extend(["swarm", "swarm-deep"]);
+            return efforts;
+        }
         if self.supports_deepseek_reasoning_effort() {
             jcode_provider_core::DEEPSEEK_SELECTABLE_EFFORTS.to_vec()
         } else if self.supports_openai_reasoning_effort() {

@@ -7,7 +7,7 @@ use crate::server::{
     register_background_tool_signal, register_session_interrupt_queue, swarm_id_for_session,
 };
 use crate::tool::Registry;
-use anyhow::Result;
+use anyhow::{Context, Result};
 use std::collections::{HashMap, HashSet};
 use std::sync::Arc;
 use std::time::Instant;
@@ -155,12 +155,13 @@ pub(super) async fn create_headless_session(
         .as_deref()
         .map(str::trim)
         .filter(|effort| !effort.is_empty())
-        && let Err(e) = new_agent.set_reasoning_effort(effort)
     {
-        crate::logging::warn(&format!(
-            "Failed to set headless session reasoning effort override '{}': {}",
-            effort, e
-        ));
+        new_agent.set_reasoning_effort(effort).with_context(|| {
+            format!(
+                "Cannot spawn session on '{}' with effort '{effort}'; refusing to silently inherit a different effort",
+                new_agent.provider_model()
+            )
+        })?;
     }
 
     new_agent.set_debug(true);

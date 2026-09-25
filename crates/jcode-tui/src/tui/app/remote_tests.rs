@@ -730,6 +730,7 @@ fn startup_history(session_id: &str) -> ServerEvent {
         status_detail: None,
         upstream_provider: None,
         resolved_credential: None,
+        available_reasoning_efforts: None,
         reasoning_effort: None,
         service_tier: None,
         compaction_mode: crate::config::CompactionMode::Reactive,
@@ -1244,8 +1245,8 @@ fn forward_pending_reasoning_effort_sends_effort_request_to_server() {
     );
     assert_eq!(
         app.remote_reasoning_effort.as_deref(),
-        Some("high"),
-        "requested effort should be tracked optimistically for the UI"
+        None,
+        "unconfirmed effort must not be displayed as active"
     );
 }
 
@@ -1333,4 +1334,40 @@ fn remote_submit_input_never_strands_a_local_pending_turn() {
         vec!["plain prompt".to_string()],
         "the prompt should be queued for the remote tick loop"
     );
+}
+
+#[test]
+fn effort_choices_and_rejections_use_server_authority() {
+    let mut app = create_test_app();
+    let runtime = tokio::runtime::Runtime::new().expect("test runtime");
+    let _entered = runtime.enter();
+    app.is_remote = true;
+    app.remote_available_reasoning_efforts = Some(vec!["low".into(), "high".into()]);
+    app.remote_reasoning_effort = Some("low".into());
+    assert_eq!(app.remote_effort_choices(), vec!["low", "high"]);
+    let mut remote = crate::tui::backend::RemoteConnection::dummy();
+    handle_server_event(
+        &mut app,
+        ServerEvent::ReasoningEffortChanged {
+            id: 1,
+            effort: None,
+            error: Some("unsupported minimal".into()),
+        },
+        &mut remote,
+    );
+    assert_eq!(app.remote_reasoning_effort.as_deref(), Some("low"));
+    handle_server_event(
+        &mut app,
+        ServerEvent::ReasoningEffortChanged {
+            id: 2,
+            effort: Some("high".into()),
+            error: None,
+        },
+        &mut remote,
+    );
+    assert_eq!(app.remote_reasoning_effort.as_deref(), Some("high"));
+    app.remote_available_reasoning_efforts = Some(vec![]);
+    app.remote_reasoning_effort = None;
+    assert!(app.remote_effort_choices().is_empty());
+    assert!(app.remote_reasoning_effort_hint().is_none());
 }

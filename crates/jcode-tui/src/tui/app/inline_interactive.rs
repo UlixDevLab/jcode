@@ -1209,10 +1209,7 @@ impl App {
             self.provider.reasoning_effort()
         };
         let available_efforts = if self.is_remote {
-            inferred_reasoning_efforts(
-                self.remote_provider_name.as_deref(),
-                self.remote_provider_model.as_deref(),
-            )
+            self.remote_effort_choices()
         } else {
             self.provider.available_efforts()
         };
@@ -1456,10 +1453,7 @@ impl App {
             self.provider.reasoning_effort()
         };
         let available_efforts = if self.is_remote {
-            inferred_reasoning_efforts(
-                self.remote_provider_name.as_deref(),
-                self.remote_provider_model.as_deref(),
-            )
+            self.remote_effort_choices()
         } else {
             self.provider.available_efforts()
         };
@@ -1725,7 +1719,18 @@ impl App {
             let mut plain_routes = Vec::new();
             let mut model_efforts = Vec::new();
             for route in entry_routes {
-                let efforts = if route_supports_reasoning_effort(&route.api_method) {
+                let efforts = if self.is_remote && self.remote_available_reasoning_efforts.is_some()
+                {
+                    // The server has verified only the active route. Other rows stay
+                    // plain until selected, rather than advertising guessed levels.
+                    if self.remote_provider_model.as_deref() == Some(name)
+                        && self.remote_provider_name.as_deref() == Some(route.provider.as_str())
+                    {
+                        self.remote_effort_choices()
+                    } else {
+                        Vec::new()
+                    }
+                } else if route_supports_reasoning_effort(&route.api_method) {
                     inferred_reasoning_efforts(Some(&route.api_method), Some(name))
                 } else {
                     Vec::new()
@@ -2103,10 +2108,7 @@ impl App {
             self.provider.reasoning_effort()
         };
         let available_efforts = if self.is_remote {
-            inferred_reasoning_efforts(
-                self.remote_provider_name.as_deref(),
-                self.remote_provider_model.as_deref(),
-            )
+            self.remote_effort_choices()
         } else {
             self.provider.available_efforts()
         };

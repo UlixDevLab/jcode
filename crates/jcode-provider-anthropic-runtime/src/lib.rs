@@ -1255,6 +1255,7 @@ impl Provider for AnthropicProvider {
         let oauth_session_id = self.oauth_session_id.clone();
         let model_state = Arc::clone(&self.model);
         let direct_transport = self.direct_transport.clone();
+        let selected_effort = self.reasoning_effort();
 
         // Spawn task to handle streaming with retry logic.
         // This includes forced OAuth refresh on auth failures.
@@ -1291,6 +1292,7 @@ impl Provider for AnthropicProvider {
                 oauth_session_id,
                 model_state,
                 direct_transport,
+                selected_effort,
             )
             .await;
             finalize_anthropic_lease(lease, &final_token, &tx).await;
@@ -1653,6 +1655,7 @@ impl Provider for AnthropicProvider {
         let oauth_session_id = self.oauth_session_id.clone();
         let model_state = Arc::clone(&self.model);
         let direct_transport = self.direct_transport.clone();
+        let selected_effort = self.reasoning_effort();
 
         // Spawn task to handle streaming with retry logic.
         //
@@ -1686,6 +1689,7 @@ impl Provider for AnthropicProvider {
                 oauth_session_id,
                 model_state,
                 direct_transport,
+                selected_effort,
             )
             .await;
             finalize_anthropic_lease(lease, &final_token, &tx).await;
@@ -1835,6 +1839,7 @@ async fn run_stream_with_retries(
     oauth_session_id: String,
     model_state: Arc<std::sync::RwLock<String>>,
     direct_transport: DirectTransportConfig,
+    selected_effort: Option<String>,
 ) -> String {
     let mut token = initial_token;
     let mut last_error = None;
@@ -2055,7 +2060,8 @@ async fn run_stream_with_retries(
                 // thinking capabilities that the live API does not actually
                 // accept: "adaptive thinking is not supported on this model" or
                 // "This model does not support the effort parameter."). Self-heal
-                // once by stripping the reasoning fields (and restoring an OAuth
+                // once only when no effort was selected, by stripping reasoning fields
+                // (and restoring an OAuth
                 // temperature, which we omit only because thinking was active)
                 // and retrying, so a stale capability table degrades gracefully
                 // instead of hard-failing.
@@ -2063,6 +2069,14 @@ async fn run_stream_with_retries(
                     && !saw_output
                     && is_reasoning_unsupported_error(&error_str)
                 {
+                    if selected_effort.is_some() {
+                        let _ = tx.send(Err(anyhow::anyhow!(
+                            "Model '{}' rejected the selected reasoning effort; refusing to retry without it: {}",
+                            model_name,
+                            e
+                        ))).await;
+                        return token;
+                    }
                     jcode_base::logging::warn(&format!(
                         "Anthropic model '{}' rejected the reasoning request ({}); retrying without thinking/effort",
                         model_name, e
@@ -2439,7 +2453,8 @@ fn is_model_not_found_error(error_str: &str) -> bool {
 ///   parameter."
 ///
 /// (e.g. `claude-fable-5`). When we hit either we can self-heal by dropping the
-/// offending reasoning fields and retrying, rather than hard-failing the turn.
+/// offending reasoning fields only when no effort was selected. A selected
+/// effort must fail visibly rather than silently change the request contract.
 /// `error_str` is expected to already be lowercased.
 fn is_reasoning_unsupported_error(error_str: &str) -> bool {
     let is_bad_request =

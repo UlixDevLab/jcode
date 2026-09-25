@@ -1182,6 +1182,10 @@ pub enum ServerEvent {
         /// render usage/billing without re-deriving it from the provider name.
         #[serde(default, skip_serializing_if = "Option::is_none")]
         resolved_credential: Option<jcode_provider_core::ResolvedCredential>,
+        /// Server-authoritative effort choices for this session's exact model/provider.
+        /// None means an older/unknown capability snapshot; Some([]) means unsupported.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        available_reasoning_efforts: Option<Vec<String>>,
         /// Reasoning effort for providers that expose it
         #[serde(skip_serializing_if = "Option::is_none")]
         reasoning_effort: Option<String>,

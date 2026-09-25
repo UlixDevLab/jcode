@@ -285,6 +285,8 @@ fn remote_protocol_frame_exceeds_limit(buffered: usize, incoming: usize) -> bool
 }
 
 pub(crate) trait RemoteEventState {
+    // Replays cannot send requests. Live connections refresh authoritative metadata.
+    fn refresh_model_catalog_detached(&mut self) {}
     fn handle_tool_start(&mut self, id: &str, name: &str);
     fn handle_tool_input(&mut self, delta: &str);
     fn get_current_tool_input(&self) -> serde_json::Value;
@@ -1433,6 +1435,9 @@ impl RemoteConnection {
 }
 
 impl RemoteEventState for RemoteConnection {
+    fn refresh_model_catalog_detached(&mut self) {
+        RemoteConnection::refresh_model_catalog_detached(self);
+    }
     fn handle_tool_start(&mut self, id: &str, name: &str) {
         Self::handle_tool_start(self, id, name);
     }

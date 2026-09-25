@@ -208,6 +208,11 @@ impl Agent {
         self.session.provider_key = Some(selection.runtime_key.stable_id());
         self.session.route_api_method = Some(selection.api_method.clone());
         self.session.model = Some(self.provider_model());
+        self.session.reasoning_effort = self.provider.reasoning_effort();
+        crate::session_effort::record_session_effort(
+            &self.session.id,
+            self.session.reasoning_effort.as_deref(),
+        );
         let event = crate::provider::ProviderStateEvent::selected_model(source, resolved_model);
         self.provider_runtime_state.apply(event);
         self.refresh_compaction_budget();
@@ -237,6 +242,11 @@ impl Agent {
                 self.session.provider_key.as_deref(),
             );
         self.session.model = Some(self.provider_model());
+        self.session.reasoning_effort = self.provider.reasoning_effort();
+        crate::session_effort::record_session_effort(
+            &self.session.id,
+            self.session.reasoning_effort.as_deref(),
+        );
         let event = crate::provider::ProviderStateEvent::selected_model(source, resolved_model);
         self.provider_runtime_state.apply(event);
         self.refresh_compaction_budget();

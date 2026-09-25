@@ -567,14 +567,28 @@ impl App {
         }
     }
 
+    pub(super) fn remote_effort_choices(&self) -> Vec<&'static str> {
+        if let Some(choices) = &self.remote_available_reasoning_efforts {
+            return choices
+                .iter()
+                .filter_map(|value| match value.as_str() {
+                    "swarm" => Some("swarm"),
+                    "swarm-deep" => Some("swarm-deep"),
+                    other => jcode_provider_core::canonical_reasoning_effort(other),
+                })
+                .collect();
+        }
+        let (provider, model) = self.remote_effort_identity();
+        inferred_reasoning_efforts(provider.as_deref(), model.as_deref())
+    }
+
     pub(super) fn cycle_effort(&mut self, direction: i8) {
         // Remote/self-dev sessions infer the level list from provider+model (the
         // same source the model picker uses), since `self.provider` is a local
         // stand-in. Local sessions read the real provider. This keeps the cycle
         // and the picker consistent (both expose swarm / swarm-deep).
         let efforts = if self.is_remote {
-            let (provider_name, provider_model) = self.remote_effort_identity();
-            inferred_reasoning_efforts(provider_name.as_deref(), provider_model.as_deref())
+            self.remote_effort_choices()
         } else {
             self.provider.available_efforts()
         };

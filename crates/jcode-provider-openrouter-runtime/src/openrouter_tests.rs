@@ -390,6 +390,7 @@ fn named_openai_compatible_model_with_empty_input_preserves_image_support() {
         models: vec![jcode_base::config::NamedProviderModelConfig {
             id: "text-model".to_string(),
             reasoning: None,
+            reasoning_efforts: None,
             reasoning_effort: None,
             input: Vec::new(),
             ..Default::default()
@@ -2280,6 +2281,7 @@ fn named_openai_compatible_model_context_window_overrides_default() {
             id: "custom-long-context".to_string(),
             context_window: Some(512_000),
             reasoning: None,
+            reasoning_efforts: None,
             reasoning_effort: None,
             input: Vec::new(),
         }],
@@ -2309,6 +2311,7 @@ fn named_profile_context_window_survives_provider_qualified_model() {
             id: "qwen3.6-35b-a2000-128k".to_string(),
             context_window: Some(131_072),
             reasoning: None,
+            reasoning_efforts: None,
             reasoning_effort: None,
             input: Vec::new(),
         }],
@@ -3804,4 +3807,64 @@ fn configured_swarm_root_effort_reads_real_config() {
         );
         assert_eq!(provider.reasoning_effort().as_deref(), Some(mode));
     }
+}
+
+#[test]
+fn explicit_model_efforts_are_authoritative_and_invalid_requests_preserve_state() {
+    let _lock = ENV_LOCK.lock();
+    let _namespace = EnvVarGuard::remove("JCODE_OPENROUTER_CACHE_NAMESPACE");
+    let mut config = jcode_base::config::NamedProviderConfig {
+        base_url: "https://compat.example.test/v1".into(),
+        api_key: Some("test".into()),
+        default_model: Some("codex/gpt-5.6-luna".into()),
+        supports_reasoning_effort: Some(true),
+        models: vec![
+            jcode_base::config::NamedProviderModelConfig {
+                id: "codex/gpt-5.6-luna".into(),
+                reasoning_efforts: Some(vec![
+                    "low".into(),
+                    "medium".into(),
+                    "high".into(),
+                    "xhigh".into(),
+                ]),
+                reasoning_effort: Some("low".into()),
+                ..Default::default()
+            },
+            jcode_base::config::NamedProviderModelConfig {
+                id: "minimax/M3".into(),
+                reasoning: Some(false),
+                reasoning_efforts: Some(vec![]),
+                ..Default::default()
+            },
+        ],
+        ..Default::default()
+    };
+    let provider = OpenRouterProvider::new_named_openai_compatible("stables", &config).unwrap();
+    assert_eq!(provider.reasoning_effort().as_deref(), Some("low"));
+    assert_eq!(
+        provider.available_efforts(),
+        vec!["low", "medium", "high", "xhigh", "swarm", "swarm-deep"]
+    );
+    provider.set_reasoning_effort("xhigh").unwrap();
+    for invalid in ["minimal", "none", "max", "bogus"] {
+        assert!(provider.set_reasoning_effort(invalid).is_err());
+        assert_eq!(provider.reasoning_effort().as_deref(), Some("xhigh"));
+    }
+    let mut request = serde_json::json!({});
+    assert!(provider.apply_resolved_reasoning_effort(&mut request, "xhigh", false));
+    assert_eq!(request["reasoning_effort"], "xhigh");
+    provider.set_reasoning_effort("swarm").unwrap();
+    assert_eq!(provider.reasoning_effort().as_deref(), Some("swarm"));
+    assert_eq!(provider.resolve_swarm_effort("max"), Some("xhigh"));
+    provider.set_model("minimax/M3").unwrap();
+    assert!(provider.available_efforts().is_empty());
+    assert!(provider.reasoning_effort().is_none());
+    for invalid in ["low", "minimal", "high", "swarm"] {
+        assert!(provider.set_reasoning_effort(invalid).is_err());
+    }
+    config.models[0].reasoning_effort = Some("minimal".into());
+    assert!(OpenRouterProvider::new_named_openai_compatible("stables", &config).is_err());
+    config.models[0].reasoning_effort = None;
+    config.models[0].reasoning_efforts = Some(vec!["invented".into()]);
+    assert!(OpenRouterProvider::new_named_openai_compatible("stables", &config).is_err());
 }

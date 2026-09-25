@@ -2862,3 +2862,20 @@ fn cache_prompt_totals_preserve_mixed_provider_accounting_and_legacy_unknown() {
     assert_eq!(session.token_usage_totals().cache_prompt_tokens, None);
     assert_eq!(session.token_usage_totals().cache_read_input_tokens, 19_000);
 }
+
+#[test]
+fn explicit_effort_persists_even_before_first_message() -> Result<()> {
+    let _env_lock = lock_env();
+    let home = tempfile::tempdir()?;
+    let _home = EnvVarGuard::set("JCODE_HOME", home.path().as_os_str());
+    let mut session = Session::create_with_id("session_effort_only".into(), None, None);
+    session.reasoning_effort = Some("low".into());
+    session.save()?;
+    assert_eq!(
+        Session::load("session_effort_only")?
+            .reasoning_effort
+            .as_deref(),
+        Some("low")
+    );
+    Ok(())
+}

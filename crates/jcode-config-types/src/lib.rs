@@ -469,6 +469,10 @@ pub enum NamedProviderAuth {
 #[serde(default)]
 pub struct NamedProviderModelConfig {
     pub id: String,
+    /// Explicit supported effort names for this model on this provider route.
+    /// An empty list disables effort control. Omission preserves provider discovery.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reasoning_efforts: Option<Vec<String>>,
     /// Explicitly enable or disable `/effort` for this model. When omitted,
     /// the provider-level setting and built-in model-family detection apply.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -526,11 +530,12 @@ pub struct NamedProviderConfig {
     /// Must be a JSON object; keys here override jcode-generated body fields.
     #[serde(default, alias = "extra-body", skip_serializing_if = "Option::is_none")]
     pub extra_body: Option<serde_json::Value>,
-    /// Whether this endpoint accepts the DeepSeek-style top-level
+    /// Whether this endpoint accepts the OpenAI-compatible top-level
     /// `reasoning_effort` request field (`/effort` support). When unset, jcode
     /// auto-detects it from the active model id (DeepSeek-family models
     /// support it regardless of which gateway serves them). Set `false` to
-    /// suppress auto-detection for strict-schema endpoints.
+    /// suppress auto-detection for strict-schema endpoints. This flag does not
+    /// define a model's effort ladder. Use per-model `reasoning_efforts` for that.
     #[serde(
         default,
         alias = "supports-reasoning-effort",

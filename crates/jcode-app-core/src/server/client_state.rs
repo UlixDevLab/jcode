@@ -239,6 +239,7 @@ pub(super) async fn handle_get_model_catalog(
         resolved_credential,
         service_tier,
         reasoning_effort,
+        available_reasoning_efforts,
         source,
     ) = {
         match agent.try_lock() {
@@ -250,6 +251,14 @@ pub(super) async fn handle_get_model_catalog(
                 agent_guard.active_resolved_credential(),
                 agent_guard.provider_handle().service_tier(),
                 agent_guard.provider_handle().reasoning_effort(),
+                Some(
+                    agent_guard
+                        .provider_handle()
+                        .available_efforts()
+                        .into_iter()
+                        .map(str::to_string)
+                        .collect::<Vec<_>>(),
+                ),
                 "live",
             ),
             Err(_) => {
@@ -275,7 +284,10 @@ pub(super) async fn handle_get_model_catalog(
                     model_routes,
                     provider.active_resolved_credential(),
                     provider.service_tier(),
-                    provider.reasoning_effort(),
+                    persisted
+                        .as_ref()
+                        .and_then(|session| session.reasoning_effort.clone()),
+                    None,
                     "fallback",
                 )
             }
@@ -310,6 +322,7 @@ pub(super) async fn handle_get_model_catalog(
         status_detail: None,
         upstream_provider: None,
         resolved_credential,
+        available_reasoning_efforts,
         reasoning_effort,
         // Catalog replies still use History, so the TUI applies this field as
         // authoritative. Omitting it falsely turns off /fast status and its badge.
@@ -569,10 +582,9 @@ async fn send_history_from_persisted_session(
     let autoreview_enabled = session.autoreview_enabled;
     let autojudge_enabled = session.autojudge_enabled;
     let is_canary = session.is_canary;
-    let reasoning_effort = session
-        .reasoning_effort
-        .clone()
-        .or_else(|| provider.reasoning_effort());
+    // None is a real session value (default or unsupported), not permission to
+    // substitute the daemon template's effort from another model.
+    let reasoning_effort = session.reasoning_effort.clone();
     let activity_context = session_activity_context_snapshot(
         session.working_dir.as_deref(),
         session.created_at,
@@ -626,6 +638,7 @@ async fn send_history_from_persisted_session(
         status_detail: None,
         upstream_provider: None,
         resolved_credential: provider.active_resolved_credential(),
+        available_reasoning_efforts: None,
         reasoning_effort,
         // The transcript is persisted, but the tier is live provider state and
         // can be read without waiting for the busy agent's mutex.
@@ -658,6 +671,14 @@ async fn send_history_with_guard(
     include_model_catalog: bool,
     supports_pdf_panels: bool,
 ) -> Result<()> {
+    let available_reasoning_efforts = Some(
+        agent_guard
+            .provider_handle()
+            .available_efforts()
+            .into_iter()
+            .map(str::to_string)
+            .collect(),
+    );
     let history_start = Instant::now();
     let (
         messages,
@@ -850,6 +871,7 @@ async fn send_history_with_guard(
         status_detail,
         upstream_provider,
         resolved_credential,
+        available_reasoning_efforts,
         reasoning_effort,
         service_tier,
         compaction_mode,

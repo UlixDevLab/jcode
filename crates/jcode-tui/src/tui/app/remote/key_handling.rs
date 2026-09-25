@@ -72,9 +72,7 @@ async fn apply_remote_effort_direction(
     // available, header hints during the pre-History bootstrap window) so
     // effort cycling works immediately after spawn instead of claiming the
     // provider does not support it until the History payload settles.
-    let (provider_name, provider_model) = app.remote_effort_identity();
-    let efforts =
-        app_mod::inferred_reasoning_efforts(provider_name.as_deref(), provider_model.as_deref());
+    let efforts = app.remote_effort_choices();
     if efforts.is_empty() {
         app.set_status_notice("Reasoning effort not available for this provider");
         return Ok(());
@@ -96,22 +94,22 @@ async fn apply_remote_effort_direction(
     } else {
         current_index - 1
     };
-    let next_effort = efforts[next_index];
-    if Some(next_effort) == current {
-        let label = app_mod::effort_display_label(next_effort);
+    let next_effort = efforts[next_index].to_string();
+    if Some(next_effort.as_str()) == current {
+        let label = app_mod::effort_display_label(&next_effort);
         app.set_status_notice(format!(
             "Effort: {} (already at {})",
             label,
             if direction > 0 { "max" } else { "min" }
         ));
     } else {
-        app.remote_reasoning_effort = Some(next_effort.to_string());
+        // Keep the confirmed value until ReasoningEffortChanged acknowledges it.
         app.invalidate_model_picker_cache();
         app.set_status_notice(format!(
-            "Effort: {} (will apply to next request)",
-            app_mod::effort_display_label(next_effort)
+            "Requesting effort: {}",
+            app_mod::effort_display_label(&next_effort)
         ));
-        remote.set_reasoning_effort(next_effort).await?;
+        remote.set_reasoning_effort(&next_effort).await?;
     }
     Ok(())
 }
@@ -1256,11 +1254,7 @@ async fn handle_remote_key_internal(
                     let label = current
                         .map(app_mod::effort_display_label)
                         .unwrap_or("default");
-                    let (provider_name, provider_model) = app.remote_effort_identity();
-                    let efforts = app_mod::inferred_reasoning_efforts(
-                        provider_name.as_deref(),
-                        provider_model.as_deref(),
-                    );
+                    let efforts = app.remote_effort_choices();
                     if efforts.is_empty() {
                         app.push_display_message(DisplayMessage::system(
                             "Reasoning effort not available for this provider.".to_string(),
@@ -1292,16 +1286,11 @@ async fn handle_remote_key_internal(
                         app.push_display_message(DisplayMessage::error("Usage: /effort <level>"));
                         return Ok(());
                     }
-                    let (provider_name, provider_model) = app.remote_effort_identity();
-                    let efforts = app_mod::inferred_reasoning_efforts(
-                        provider_name.as_deref(),
-                        provider_model.as_deref(),
-                    );
+                    let efforts = app.remote_effort_choices();
                     if efforts.contains(&level) {
-                        app.remote_reasoning_effort = Some(level.to_string());
                         app.invalidate_model_picker_cache();
                         app.set_status_notice(format!(
-                            "Effort: {} (will apply to next request)",
+                            "Requesting effort: {}",
                             app_mod::effort_display_label(level)
                         ));
                     }
