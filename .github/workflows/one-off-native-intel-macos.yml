@@ -21,10 +21,6 @@ jobs:
       # records the actual load-command value and rejects a stricter result.
       MACOSX_DEPLOYMENT_TARGET: "11.0"
       JCODE_BUILD_SEMVER: "0.86.384"
-      JCODE_BUILD_GIT_HASH: "98690be3e46b436ad1fa708912e133ef4c40a73b"
-      JCODE_BUILD_GIT_DATE: "2026-09-23 20:48:48 +0200"
-      JCODE_BUILD_GIT_DIRTY: "false"
-      JCODE_BUILD_GIT_TAG: "v0.86.0-384-g98690be3e"
       JCODE_NO_TELEMETRY: "1"
       CARGO_TERM_COLOR: always
 
@@ -38,6 +34,11 @@ jobs:
           set -euo pipefail
           if [[ ! "$SOURCE_REF" =~ ^[0-9a-f]{40}$ ]]; then
             echo "source_ref must be a lowercase full 40-character Git SHA" >&2
+            exit 2
+          fi
+          reviewed_source_ref="c8c838f470657e0639065539a97b604205aee33f"
+          if [[ "$SOURCE_REF" != "$reviewed_source_ref" ]]; then
+            echo "source_ref is not the reviewed sanitized export revision" >&2
             exit 2
           fi
           printf 'source_ref=%s\n' "$SOURCE_REF" >> "$GITHUB_OUTPUT"
@@ -57,7 +58,10 @@ jobs:
           set -euo pipefail
           actual="$(git rev-parse HEAD)"
           test "$actual" = "$EXPECTED_SOURCE_REF"
-          expected_build_input_digest="6132d87ead8556682e8b1fa4fa134ab4609140387bcd5f9bc52daf74a0e52b0a"
+          expected_export_tree="8855990074025b3cc5b2f962175d3b116fed17ca"
+          actual_export_tree="$(git rev-parse HEAD^{tree})"
+          test "$actual_export_tree" = "$expected_export_tree"
+          expected_build_input_digest="616c1d6c045a6dd6047f2bca8ddda3c5fb6b7cad3feca5724461ec4bb3e7b213"
           actual_build_input_digest="$(
             LC_ALL=C git ls-files -s -- .cargo Cargo.lock Cargo.toml crates src \
               | LC_ALL=C sort \
@@ -68,13 +72,33 @@ jobs:
           python3 - <<'PY'
           import json
           from pathlib import Path
+
           data = json.loads(Path("SOURCE-PROVENANCE.json").read_text(encoding="utf-8"))
-          if data.get("source_git_hash") != "98690be3e46b436ad1fa708912e133ef4c40a73b":
-              raise SystemExit("reviewed source hash mismatch")
-          if data.get("source_tree") != "4c9d18d36cd7a1ee284d8c164a943e9704042bb2":
-              raise SystemExit("reviewed source tree mismatch")
+          expected = {
+              "schema": "jcode-native-source-export/v2",
+              "effective_build_input_digest": "616c1d6c045a6dd6047f2bca8ddda3c5fb6b7cad3feca5724461ec4bb3e7b213",
+              "source_base_git_hash": "98690be3e46b436ad1fa708912e133ef4c40a73b",
+              "source_base_tree": "4c9d18d36cd7a1ee284d8c164a943e9704042bb2",
+          }
+          for key, value in expected.items():
+              if data.get(key) != value:
+                  raise SystemExit(f"reviewed sanitized source {key} mismatch")
+          expected_paths = [
+              "crates/jcode-base/src/auth/antigravity.rs",
+              "crates/jcode-base/src/auth/gemini.rs",
+          ]
+          if data.get("sanitization", {}).get("changed_build_input_paths") != expected_paths:
+              raise SystemExit("reviewed sanitized source delta mismatch")
           PY
+          source_date="$(git show -s --format=%cI HEAD)"
+          {
+            printf 'JCODE_BUILD_GIT_HASH=%s\n' "$actual"
+            printf 'JCODE_BUILD_GIT_DATE=%s\n' "$source_date"
+            printf 'JCODE_BUILD_GIT_DIRTY=false\n'
+            printf 'JCODE_BUILD_GIT_TAG=v0.86.0-384-g%s\n' "${actual:0:7}"
+          } >> "$GITHUB_ENV"
           printf 'export_revision=%s\n' "$actual" >> "$GITHUB_OUTPUT"
+          printf 'export_tree=%s\n' "$actual_export_tree" >> "$GITHUB_OUTPUT"
 
       - name: Assert native Intel runner
         shell: bash
@@ -141,7 +165,7 @@ jobs:
           import json
           from pathlib import Path
 
-          expected = "98690be3e46b436ad1fa708912e133ef4c40a73b"
+          expected = "${{ steps.source-revision.outputs.export_revision }}"
           data = json.loads(Path("evidence/version.json").read_text(encoding="utf-8"))
           if data.get("git_hash") != expected:
               raise SystemExit(f"version git_hash mismatch: {data.get('git_hash')!r}")
@@ -185,8 +209,15 @@ jobs:
 
           provenance = {
               "schema_version": "jcode-lite-native-binary-provenance/v1",
-              "source_git_hash": "98690be3e46b436ad1fa708912e133ef4c40a73b",
-              "source_tree": "4c9d18d36cd7a1ee284d8c164a943e9704042bb2",
+              "source_git_hash": "${{ steps.source-revision.outputs.export_revision }}",
+              "source_tree": "${{ steps.source-revision.outputs.export_tree }}",
+              "source_base_git_hash": "98690be3e46b436ad1fa708912e133ef4c40a73b",
+              "source_base_tree": "4c9d18d36cd7a1ee284d8c164a943e9704042bb2",
+              "build_input_digest": "616c1d6c045a6dd6047f2bca8ddda3c5fb6b7cad3feca5724461ec4bb3e7b213",
+              "sanitized_build_input_paths": [
+                  "crates/jcode-base/src/auth/antigravity.rs",
+                  "crates/jcode-base/src/auth/gemini.rs",
+              ],
               "export_revision": "${{ steps.source-revision.outputs.export_revision }}",
               "target": "x86_64-apple-darwin",
               "binary_sha256": text("evidence/binary-sha256.txt"),
